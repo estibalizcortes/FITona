@@ -5,7 +5,7 @@
 *.jks
 
 # Backend (Maven/Quarkus)
-backend/target/
+**/target/
 *.class
 *.log
 
