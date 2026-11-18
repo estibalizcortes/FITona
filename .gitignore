@@ -1,0 +1,25 @@
+# Secretos y entorno local
+.env
+*.pem
+*.p12
+*.jks
+
+# Backend (Maven/Quarkus)
+backend/target/
+*.class
+*.log
+
+# Frontend (Node/Angular/Ionic/Capacitor)
+node_modules/
+frontend/dist/
+frontend/www/
+frontend/.angular/
+frontend/android/app/build/
+frontend/ios/App/Pods/
+
+# IDE y sistema
+.idea/
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db

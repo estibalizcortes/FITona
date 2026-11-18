@@ -1,0 +1,43 @@
+# FITona · entorno de desarrollo local (Windows 11 + Docker Desktop, o Linux)
+# Uso: docker compose up -d oracle && docker compose run --rm migrate
+# Las credenciales se leen de .env (copiar desde .env.example). No se versiona .env.
+name: fitona
+
+services:
+  oracle:
+    image: ${ORACLE_IMAGE:-gvenzl/oracle-free:23-slim-faststart}
+    container_name: fitona-oracle
+    ports:
+      - "127.0.0.1:${ORACLE_PORT:-1521}:1521"
+    environment:
+      ORACLE_PASSWORD: ${ORACLE_SYS_PASSWORD:?Defina ORACLE_SYS_PASSWORD en .env}
+      APP_USER: FITONA_OWNER
+      APP_USER_PASSWORD: ${FITONA_OWNER_PASSWORD:?Defina FITONA_OWNER_PASSWORD en .env}
+      FITONA_APP_PASSWORD: ${FITONA_APP_PASSWORD:?Defina FITONA_APP_PASSWORD en .env}
+    volumes:
+      - oracle-data:/opt/oracle/oradata
+      - ./database/provisioning:/container-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  migrate:
+    image: ${FLYWAY_IMAGE:-flyway/flyway:13.12.2}
+    profiles: ["tools"]
+    depends_on:
+      oracle:
+        condition: service_healthy
+    volumes:
+      - ./database/migrations:/flyway/sql:ro
+    command: >
+      -url=jdbc:oracle:thin:@//oracle:1521/FREEPDB1
+      -user=FITONA_OWNER
+      -password=${FITONA_OWNER_PASSWORD}
+      -locations=filesystem:/flyway/sql
+      migrate
+
+volumes:
+  oracle-data:
