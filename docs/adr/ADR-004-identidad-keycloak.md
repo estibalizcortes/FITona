@@ -11,3 +11,6 @@ Keycloak 26.x autogestionado con quarkus-oidc y PKCE. La aplicación guarda solo
 
 ## Consecuencias
 Control y datos en la UE; coste operativo extra (memoria, actualizaciones). Alternativa gestionada a evaluar si la operación resulta pesada.
+
+## Actualización (18-nov-2026)
+**Keycloak no está implementado.** El backend incluye solo una identidad de **desarrollo** (cabecera `X-Dev-User` con un UUID, activable con `FITONA_AUTH_DEV_ENABLED=true`; desactivada por defecto: sin ella toda petición a `/api` responde 401). No es seguridad real y no debe exponerse. La integración OIDC es requisito previo a cualquier uso con datos reales.

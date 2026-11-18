@@ -25,7 +25,7 @@ Write-Host '1/3 Levantando Oracle (la primera vez tarda unos minutos)...' -Foreg
 Invoke-Checked 'docker compose up oracle' { docker compose up -d --wait oracle }
 
 Write-Host '2/3 Aplicando migraciones Flyway...' -ForegroundColor Cyan
-Invoke-Checked 'flyway migrate' { docker compose --profile tools run --rm migrate }
+Invoke-Checked 'flyway migrate' { docker compose run --rm migrate }
 
 if (-not $SkipTests) {
     Write-Host '3/3 Prueba de humo del esquema...' -ForegroundColor Cyan

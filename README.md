@@ -2,7 +2,15 @@
 
 Aplicación de alimentación, nutrición y vida cotidiana: **tu menú se adapta a tu vida**. Organiza despensa → plan → compra → diario → sobras; los números son opcionales y no hay culpa.
 
-> **Estado (v0.0):** investigación, diseño, esquema Oracle y entorno local **hechos y probados**. Backend (Quarkus) y frontend (Angular/Ionic) **aún no existen**. No hay nada desplegado ni publicado.
+> **Estado:** v0.1 en construcción. **Funciona de extremo a extremo en navegador** (crear alimento → registrar en una comida → calcular → guardar → volver a consultar; recetas; modos de uso), probado en el entorno de desarrollo remoto. **Sin autenticación real** y **catálogo compartido vacío**. Detalle honesto en [docs/estado-implementacion.md](docs/estado-implementacion.md).
+
+## Arranque rápido (Windows 11 + PowerShell + Docker Desktop)
+
+```powershell
+cd C:\Users\corte\Documents\FITona
+.\scripts\dev\app-up.ps1      # Oracle + migraciones + backend + frontend
+# abrir http://localhost:4200
+```
 
 ## Documentación
 
@@ -18,6 +26,7 @@ Aplicación de alimentación, nutrición y vida cotidiana: **tu menú se adapta 
 | H · Costes | [docs/producto/H-costes.md](docs/producto/H-costes.md) |
 | I · Riesgos | [docs/producto/I-riesgos.md](docs/producto/I-riesgos.md) |
 | **J · Propuesta final (empezar aquí)** | [docs/producto/J-propuesta-final.md](docs/producto/J-propuesta-final.md) |
+| **Estado real de la implementación** | [docs/estado-implementacion.md](docs/estado-implementacion.md) |
 | Decisiones (ADR) | [docs/adr/](docs/adr/README.md) |
 | Investigaciones de apoyo | [docs/investigacion/](docs/investigacion/) |
 
@@ -40,6 +49,8 @@ La primera ejecución crea `.env` desde `.env.example` (cambie las claves). Cone
 ## Estructura
 
 ```
+backend/       motor nutricional (Java puro) y API Quarkus
+frontend/      aplicación Angular 22 y recorrido E2E (Playwright)
 database/      migraciones Flyway, aprovisionamiento local y pruebas del esquema
 docs/          entregables, ADR e investigaciones
 scripts/dev/   scripts PowerShell de desarrollo

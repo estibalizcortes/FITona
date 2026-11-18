@@ -1,5 +1,6 @@
-# FITona · entorno de desarrollo local (Windows 11 + Docker Desktop, o Linux)
-# Uso: docker compose up -d oracle && docker compose run --rm migrate
+# FITona · entorno local completo (Windows 11 + Docker Desktop, o Linux).
+#   Todo:        docker compose up -d --build        -> http://localhost:4200
+#   Solo BD:     docker compose up -d oracle && docker compose run --rm migrate
 # Las credenciales se leen de .env (copiar desde .env.example). No se versiona .env.
 name: fitona
 
@@ -24,9 +25,9 @@ services:
       retries: 30
       start_period: 30s
 
+  # Aplica las migraciones Flyway como propietario del esquema y termina.
   migrate:
     image: ${FLYWAY_IMAGE:-flyway/flyway:13.12.2}
-    profiles: ["tools"]
     depends_on:
       oracle:
         condition: service_healthy
@@ -38,6 +39,42 @@ services:
       -password=${FITONA_OWNER_PASSWORD}
       -locations=filesystem:/flyway/sql
       migrate
+    restart: "no"
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      args:
+        MAVEN_IMAGE: ${MAVEN_IMAGE:-maven:3.9-eclipse-temurin-21}
+        JRE_IMAGE: ${JRE_IMAGE:-eclipse-temurin:21-jre}
+    image: fitona-backend:dev
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      FITONA_DB_URL: jdbc:oracle:thin:@//oracle:1521/FREEPDB1
+      FITONA_DB_USER: FITONA_APP
+      FITONA_DB_PASSWORD: ${FITONA_APP_PASSWORD}
+      # SOLO DESARROLLO: autenticación por cabecera X-Dev-User (no es seguridad real). Ver ADR-004.
+      FITONA_AUTH_DEV_ENABLED: "true"
+    ports:
+      - "127.0.0.1:${BACKEND_PORT:-8080}:8080"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        NODE_IMAGE: ${NODE_IMAGE:-node:22-alpine}
+        NGINX_IMAGE: ${NGINX_IMAGE:-nginx:1.27-alpine}
+    image: fitona-frontend:dev
+    depends_on:
+      - backend
+    ports:
+      - "127.0.0.1:${WEB_PORT:-4200}:80"
+    restart: unless-stopped
 
 volumes:
   oracle-data:

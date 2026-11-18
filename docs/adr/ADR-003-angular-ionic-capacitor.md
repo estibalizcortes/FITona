@@ -11,3 +11,6 @@ Cliente único Angular standalone con Ionic (navegación, gestos, áreas seguras
 
 ## Consecuencias
 Reutilización total del código. iOS exige macOS/Xcode para compilar y firmar. Plugins de salud de terceros (@capgo/capacitor-health) a vigilar. Fijar TypeScript en 6.0.x.
+
+## Actualización (18-nov-2026)
+El MVP web se ha construido con **Angular 22 sin componentes de Ionic todavía** (PWA/navegador): reduce riesgo y tamaño (259 kB iniciales) mientras no hay empaquetado móvil. Ionic y Capacitor se incorporarán al preparar Android/iOS (v0.5+). No se ha verificado aún la compatibilidad de Ionic 9 con la detección de cambios sin zona de Angular 22 (la app es *zoneless*): comprobarlo antes de adoptarlo.
