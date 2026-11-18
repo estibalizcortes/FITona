@@ -1,0 +1,24 @@
+<a class="skip" href="#main">Saltar al contenido</a>
+<header class="topbar">
+  <a routerLink="/hoy" class="brand" aria-label="FITona, ir a Hoy">FITona</a>
+  <label class="mode">
+    <span class="sr-only">Modo de uso</span>
+    <select [value]="prefs.mode()" (change)="setMode($event)" aria-label="Modo de uso">
+      @for (m of modes; track m.value) {
+        <option [value]="m.value" [selected]="m.value === prefs.mode()">{{ m.label }}</option>
+      }
+    </select>
+  </label>
+</header>
+
+<main id="main" class="page">
+  <router-outlet />
+</main>
+
+<nav class="tabbar" aria-label="Navegación principal">
+  <a routerLink="/hoy" routerLinkActive="active"><span aria-hidden="true">🍽</span>Hoy</a>
+  <a routerLink="/alimentos" routerLinkActive="active"><span aria-hidden="true">🥕</span>Alimentos</a>
+  <a routerLink="/registrar" routerLinkActive="active" class="add" aria-label="Registrar comida"><span aria-hidden="true">＋</span><b>Registrar</b></a>
+  <a routerLink="/recetas" routerLinkActive="active"><span aria-hidden="true">📖</span>Recetas</a>
+  <a routerLink="/yo" routerLinkActive="active"><span aria-hidden="true">👤</span>Yo</a>
+</nav>
