@@ -40,7 +40,7 @@ class AuthTest {
         // validaciones: adulta, consentimiento, contraseña corta, correo inválido
         post("/api/v1/auth/register", reg(mail, "clave-muy-larga-1", false, true)).then().statusCode(400);
         post("/api/v1/auth/register", reg(mail, "clave-muy-larga-1", true, false)).then().statusCode(400);
-        post("/api/v1/auth/register", reg(mail, "corta", true, true)).then().statusCode(400);
+        post("/api/v1/auth/register", reg(mail, "abc", true, true)).then().statusCode(400);
         post("/api/v1/auth/register", reg("no-es-correo", "clave-muy-larga-1", true, true)).then().statusCode(400);
         String token = post("/api/v1/auth/register", reg(mail, "clave-muy-larga-1", true, true)).then().statusCode(201)
                 .body("token", notNullValue()).extract().path("token");

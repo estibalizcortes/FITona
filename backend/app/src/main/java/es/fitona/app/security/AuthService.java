@@ -59,8 +59,8 @@ public class AuthService {
     @Transactional
     public Session register(String emailRaw, String password, boolean adult, boolean healthConsent) {
         String email = normalizeEmail(emailRaw);
-        if (password == null || password.length() < 10 || password.length() > 128) {
-            throw new AuthException(400, "La contraseña debe tener entre 10 y 128 caracteres.");
+        if (password == null || password.length() < 4 || password.length() > 128) {
+            throw new AuthException(400, "La contraseña debe tener entre 4 y 128 caracteres.");
         }
         if (!adult) throw new AuthException(400, "FITona es solo para personas adultas.");
         if (!healthConsent) {

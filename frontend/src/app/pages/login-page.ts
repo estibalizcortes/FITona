@@ -20,7 +20,7 @@ import { Session } from '../core/session';
         <label class="field">
           <span>Contraseña</span>
           <input type="password" required [attr.autocomplete]="creating() ? 'new-password' : 'current-password'" maxlength="128" [value]="password()" (input)="password.set($any($event.target).value)" />
-          @if (creating()) { <small class="muted">Mínimo 10 caracteres. Mejor una frase larga que algo corto y raro.</small> }
+          @if (creating()) { <small class="muted">Mínimo 4 caracteres.</small> }
         </label>
         @if (creating()) {
           <label class="check"><input type="checkbox" [checked]="adult()" (change)="adult.set($any($event.target).checked)" /> Soy mayor de edad.</label>
