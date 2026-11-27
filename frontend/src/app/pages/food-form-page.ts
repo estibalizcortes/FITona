@@ -45,11 +45,13 @@ const FIELDS: { key: NutrientKey; label: string; unit: string; hint?: string }[]
             <p class="warn">Este alimento aún no tiene datos nutricionales. Puedes ponerle los tuyos o apuntarlo sin cifras.</p>
           }
           <div class="actions">
-            <a class="btn primary" routerLink="/alimentos/nuevo" [queryParams]="{ basedOn: c.variantId }">Poner mis valores</a>
+            <a class="btn primary" routerLink="/registrar" [queryParams]="{ food: c.variantId }">Registrar en el diario</a>
+            <a class="btn" routerLink="/alimentos/nuevo" [queryParams]="{ basedOn: c.variantId }">Poner mis valores</a>
             <a class="btn" routerLink="/alimentos">Volver</a>
           </div>
         </article>
       } @else {
+      @if (editing() && id()) { <p><a class="btn primary" routerLink="/registrar" [queryParams]="{ food: id() }">Registrar en el diario</a></p> }
       @if (basedOnFood()) { <p class="muted">Se usará <strong>en lugar del alimento del catálogo</strong>, solo para ti. Si luego borras el tuyo, vuelve el del catálogo.</p> }
       <p class="muted">Valores <strong>por 100 g</strong>. Deja vacío lo que no sepas: «sin dato» no es lo mismo que 0.</p>
       <form (submit)="submit($event)">

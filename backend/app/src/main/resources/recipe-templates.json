@@ -1,53 +1,1469 @@
 [
-  {"key":"tortilla-de-patatas","title":"Tortilla de patatas","servings":4,"ingredients":[
-    {"food":"Patata (cruda)","quantity":500,"unit":"G"},{"food":"Huevo de gallina","quantity":5,"unit":"UNIT"},
-    {"food":"Cebolla","quantity":1,"unit":"UNIT"},{"food":"Aceite de oliva","quantity":4,"unit":"TBSP"}],
-   "steps":["Pela y corta las patatas y la cebolla.","Cocínalas en la sartén con el aceite hasta que estén tiernas.","Bate los huevos, mézclalos con las patatas y cuaja la tortilla por ambos lados hasta que no quede huevo líquido."]},
-  {"key":"ensalada-mixta","title":"Ensalada mixta con atún","servings":2,"ingredients":[
-    {"food":"Lechuga","quantity":150,"unit":"G"},{"food":"Tomate","quantity":2,"unit":"UNIT"},
-    {"food":"Cebolla","quantity":0.5,"unit":"UNIT"},{"food":"Atún al natural (escurrido)","quantity":1,"unit":"CAN"},
-    {"food":"Huevo de gallina","quantity":2,"unit":"UNIT"},{"food":"Aceite de oliva","quantity":2,"unit":"TBSP"}],
-   "steps":["Cuece los huevos hasta que estén duros y déjalos enfriar.","Trocea la lechuga, el tomate y la cebolla.","Añade el atún escurrido y el huevo troceado y aliña con el aceite."]},
-  {"key":"pasta-con-tomate","title":"Pasta con tomate","servings":2,"ingredients":[
-    {"food":"Espaguetis (secos)","quantity":160,"unit":"G"},{"food":"Tomate","quantity":400,"unit":"G"},
-    {"food":"Cebolla","quantity":1,"unit":"UNIT"},{"food":"Aceite de oliva","quantity":1,"unit":"TBSP"}],
-   "steps":["Cuece la pasta siguiendo las instrucciones del paquete.","Sofríe la cebolla picada con el aceite y añade el tomate troceado hasta que se haga la salsa.","Mezcla la pasta escurrida con la salsa."]},
-  {"key":"arroz-con-pollo","title":"Arroz con pollo y verduras","servings":4,"ingredients":[
-    {"food":"Arroz blanco (crudo)","quantity":300,"unit":"G"},{"food":"Pechuga de pollo (cruda)","quantity":500,"unit":"G"},
-    {"food":"Pimiento rojo","quantity":1,"unit":"UNIT"},{"food":"Tomate","quantity":2,"unit":"UNIT"},
-    {"food":"Aceite de oliva","quantity":3,"unit":"TBSP"}],
-   "steps":["Trocea el pollo y dóralo en la cazuela con el aceite hasta que esté bien hecho por dentro.","Añade el pimiento y el tomate troceados y sofríe.","Incorpora el arroz y el caldo o agua y cuécelo hasta que esté tierno."]},
-  {"key":"lentejas-guisadas","title":"Lentejas guisadas","servings":4,"ingredients":[
-    {"food":"Lentejas cocidas","quantity":800,"unit":"G"},{"food":"Patata (cruda)","quantity":1,"unit":"UNIT"},
-    {"food":"Zanahoria","quantity":2,"unit":"UNIT"},{"food":"Cebolla","quantity":1,"unit":"UNIT"},
-    {"food":"Aceite de oliva","quantity":2,"unit":"TBSP"}],
-   "steps":["Sofríe la cebolla y la zanahoria picadas con el aceite.","Añade la patata troceada, las lentejas cocidas y agua o caldo.","Cuece hasta que la patata esté tierna."]},
-  {"key":"garbanzos-con-espinacas","title":"Garbanzos con espinacas","servings":4,"ingredients":[
-    {"food":"Garbanzos cocidos","quantity":600,"unit":"G"},{"food":"Espinacas","quantity":300,"unit":"G"},
-    {"food":"Aceite de oliva","quantity":2,"unit":"TBSP"}],
-   "steps":["Calienta el aceite y rehoga las espinacas.","Añade los garbanzos cocidos y caliéntalo todo junto."]},
-  {"key":"crema-de-calabacin","title":"Crema de calabacín","servings":4,"ingredients":[
-    {"food":"Calabacín","quantity":3,"unit":"UNIT"},{"food":"Patata (cruda)","quantity":1,"unit":"UNIT"},
-    {"food":"Cebolla","quantity":1,"unit":"UNIT"},{"food":"Aceite de oliva","quantity":1,"unit":"TBSP"}],
-   "steps":["Trocea las verduras y cuécelas en agua hasta que estén tiernas.","Tritúralas con el aceite y sal al gusto."]},
-  {"key":"salmon-con-patata","title":"Salmón con patata","servings":2,"ingredients":[
-    {"food":"Salmón","quantity":300,"unit":"G"},{"food":"Patata (cocida)","quantity":300,"unit":"G"},
-    {"food":"Aceite de oliva","quantity":1,"unit":"TBSP"}],
-   "steps":["Cocina el salmón a la plancha con el aceite hasta que esté hecho por dentro.","Sírvelo con la patata cocida."]},
-  {"key":"revuelto-de-espinacas","title":"Revuelto de espinacas","servings":2,"ingredients":[
-    {"food":"Huevo de gallina","quantity":4,"unit":"UNIT"},{"food":"Espinacas","quantity":200,"unit":"G"},
-    {"food":"Aceite de oliva","quantity":1,"unit":"TBSP"}],
-   "steps":["Rehoga las espinacas con el aceite.","Añade los huevos batidos y remueve hasta que cuajen por completo."]},
-  {"key":"avena-con-leche-y-platano","title":"Avena con leche y plátano","servings":1,"ingredients":[
-    {"food":"Copos de avena","quantity":50,"unit":"G"},{"food":"Leche semidesnatada","quantity":1,"unit":"GLASS"},
-    {"food":"Plátano","quantity":1,"unit":"UNIT"}],
-   "steps":["Calienta la leche con la avena removiendo.","Añade el plátano en rodajas."]},
-  {"key":"yogur-con-fresas-y-nueces","title":"Yogur griego con fresas y nueces","servings":1,"ingredients":[
-    {"food":"Yogur griego","quantity":1,"unit":"UNIT"},{"food":"Fresa","quantity":100,"unit":"G"},
-    {"food":"Nueces","quantity":15,"unit":"G"}],
-   "steps":["Pon el yogur en un cuenco con las fresas troceadas y las nueces por encima."]},
-  {"key":"tostada-con-tomate","title":"Tostada con tomate y aceite","servings":1,"ingredients":[
-    {"food":"Pan blanco","quantity":2,"unit":"SLICE"},{"food":"Tomate","quantity":60,"unit":"G"},
-    {"food":"Aceite de oliva","quantity":1,"unit":"TBSP"}],
-   "steps":["Tuesta el pan, úntalo con el tomate rallado y añade el aceite."]}
+ {
+  "key": "tortilla-de-patatas",
+  "title": "Tortilla de patatas",
+  "servings": 3,
+  "description": "Medidas naturales: ajusta patatas, huevos y cebolla a lo que tengas. Quita la cebolla si no la quieres y guarda la versión con tu nombre.",
+  "ingredients": [
+   {
+    "food": "Patata (cruda)",
+    "quantity": 2,
+    "unit": "UNIT_L"
+   },
+   {
+    "food": "Huevo de gallina",
+    "quantity": 3,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Cebolla",
+    "quantity": 0.5,
+    "unit": "UNIT",
+    "note": "opcional: quítala para una tortilla sin cebolla"
+   },
+   {
+    "food": "Aceite de oliva",
+    "quantity": 2,
+    "unit": "SPLASH",
+    "note": "un chorrito; si usas freidora de aire, menos"
+   }
+  ],
+  "steps": [
+   "Pela y corta las patatas en láminas finas y la cebolla en juliana.",
+   "Patatas, opción 1 (freidora de aire): con un poco de aceite, prográmala según el manual de tu aparato (por ejemplo, unos 195 °C durante 10-12 minutos) y comprueba que las patatas estén hechas por dentro. Opción 2: fríelas en una olla o sartén con aceite de oliva o de girasol caliente hasta que estén tiernas.",
+   "La cebolla: sofríela con un chorrito de aceite en una sartén, o ponla junto a las patatas en la freidora de aire.",
+   "Bate los huevos crudos enteros (o quita parte de las yemas si lo prefieres) y mézclalos con las patatas y la cebolla.",
+   "Cuaja la mezcla en la sartén y dale la vuelta con cuidado (con un plato) hasta que no quede huevo líquido."
+  ]
+ },
+ {
+  "key": "bol-de-yogur-con-cereales",
+  "title": "Bol de yogur con avena, chocolate y semillas",
+  "servings": 1,
+  "description": "Cambia el yogur o las semillas por lo que uses; el cálculo se actualiza al guardar.",
+  "ingredients": [
+   {
+    "food": "Yogur griego",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Copos de avena",
+    "quantity": 3,
+    "unit": "TBSP"
+   },
+   {
+    "food": "Chocolate negro",
+    "quantity": 2,
+    "unit": "SQUARE",
+    "note": "picado"
+   },
+   {
+    "food": "Semillas de lino",
+    "quantity": 1,
+    "unit": "TBSP"
+   },
+   {
+    "food": "Semillas de chía",
+    "quantity": 1,
+    "unit": "TBSP",
+    "note": "o el mix de semillas que tengas"
+   }
+  ],
+  "steps": [
+   "Pon el yogur en un bol.",
+   "Añade los copos de avena, el chocolate negro picado y las semillas.",
+   "Mezcla o come por capas."
+  ]
+ },
+ {
+  "key": "yogur-griego-casero",
+  "title": "Yogur natural y griego casero",
+  "servings": 8,
+  "description": "Valores calculados con la leche y el yogur de partida (yogur natural sin colar); el colado concentra los nutrientes y pierde suero, así que los valores son orientativos.",
+  "ingredients": [
+   {
+    "food": "Leche entera",
+    "quantity": 1000,
+    "unit": "ML",
+    "note": "también vale semidesnatada o desnatada"
+   },
+   {
+    "food": "Yogur natural",
+    "quantity": 1,
+    "unit": "UNIT",
+    "note": "o griego, sin sabor (también sirve uno de sabores si no te importa el sabor)"
+   }
+  ],
+  "steps": [
+   "Calienta la leche en un cazo sin dejar que hierva: tiene que quedar templada-caliente (si metes el dedo, debes poder aguantarlo unos 5 segundos).",
+   "Aparta la leche del fuego, añade el yogur y remueve bien.",
+   "Tapa y deja reposar en un sitio oscuro y sin moverlo, de 24 a 48 horas. Pasado ese tiempo tendrás yogur natural.",
+   "Para yogur griego: ponlo sobre una tela fina (o gasa) sobre un colador y déjalo en la nevera, tapado, otras 24 a 48 horas hasta que suelte el suero.",
+   "Tira el suero. Lo que queda es el yogur griego. Si no separas el suero, es yogur natural. Guárdalo en la nevera."
+  ]
+ },
+ {
+  "key": "pasta-con-tomate",
+  "title": "Pasta con tomate",
+  "servings": 2,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Espaguetis (secos)",
+    "quantity": 160,
+    "unit": "G"
+   },
+   {
+    "food": "Tomate triturado",
+    "quantity": 300,
+    "unit": "G"
+   },
+   {
+    "food": "Cebolla",
+    "quantity": 0.5,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Aceite de oliva",
+    "quantity": 1,
+    "unit": "TBSP"
+   }
+  ],
+  "steps": [
+   "Cuece la pasta siguiendo las instrucciones del paquete.",
+   "Sofríe la cebolla picada con el aceite y añade el tomate hasta que se haga la salsa.",
+   "Mezcla la pasta escurrida con la salsa."
+  ]
+ },
+ {
+  "key": "macarrones-con-atun",
+  "title": "Macarrones con tomate y atún",
+  "servings": 2,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Macarrones (secos)",
+    "quantity": 160,
+    "unit": "G"
+   },
+   {
+    "food": "Tomate frito",
+    "quantity": 200,
+    "unit": "G"
+   },
+   {
+    "food": "Atún al natural (escurrido)",
+    "quantity": 1,
+    "unit": "CAN"
+   }
+  ],
+  "steps": [
+   "Cuece los macarrones siguiendo el paquete.",
+   "Calienta el tomate frito y mezcla el atún escurrido.",
+   "Mezcla con la pasta escurrida."
+  ]
+ },
+ {
+  "key": "espaguetis-boloñesa",
+  "title": "Espaguetis a la boloñesa",
+  "servings": 3,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Espaguetis (secos)",
+    "quantity": 240,
+    "unit": "G"
+   },
+   {
+    "food": "Carne picada de vacuno",
+    "quantity": 300,
+    "unit": "G"
+   },
+   {
+    "food": "Tomate triturado",
+    "quantity": 300,
+    "unit": "G"
+   },
+   {
+    "food": "Cebolla",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Zanahoria",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Aceite de oliva",
+    "quantity": 1,
+    "unit": "TBSP"
+   }
+  ],
+  "steps": [
+   "Sofríe la cebolla y la zanahoria picadas con el aceite.",
+   "Añade la carne picada y cocínala hasta que no quede rosada por dentro.",
+   "Agrega el tomate y cocina a fuego suave.",
+   "Cuece la pasta y mézclala con la salsa."
+  ]
+ },
+ {
+  "key": "ensalada-mixta",
+  "title": "Ensalada mixta con atún",
+  "servings": 2,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Lechuga",
+    "quantity": 150,
+    "unit": "G"
+   },
+   {
+    "food": "Tomate",
+    "quantity": 2,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Cebolla",
+    "quantity": 0.5,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Atún al natural (escurrido)",
+    "quantity": 1,
+    "unit": "CAN"
+   },
+   {
+    "food": "Huevo de gallina",
+    "quantity": 2,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Aceite de oliva",
+    "quantity": 1,
+    "unit": "TBSP"
+   }
+  ],
+  "steps": [
+   "Cuece los huevos hasta que estén duros y déjalos enfriar.",
+   "Trocea la lechuga, el tomate y la cebolla.",
+   "Añade el atún escurrido y el huevo troceado y aliña con el aceite."
+  ]
+ },
+ {
+  "key": "arroz-con-pollo",
+  "title": "Arroz con pollo y verduras",
+  "servings": 4,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Arroz blanco (crudo)",
+    "quantity": 300,
+    "unit": "G"
+   },
+   {
+    "food": "Pechuga de pollo (cruda)",
+    "quantity": 500,
+    "unit": "G"
+   },
+   {
+    "food": "Pimiento rojo",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Tomate",
+    "quantity": 2,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Aceite de oliva",
+    "quantity": 3,
+    "unit": "TBSP"
+   }
+  ],
+  "steps": [
+   "Trocea el pollo y dóralo en la cazuela con el aceite hasta que esté bien hecho por dentro.",
+   "Añade el pimiento y el tomate troceados y sofríe.",
+   "Incorpora el arroz y el caldo o agua y cuécelo hasta que esté tierno."
+  ]
+ },
+ {
+  "key": "arroz-con-verduras",
+  "title": "Arroz con verduras",
+  "servings": 3,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Arroz blanco (crudo)",
+    "quantity": 200,
+    "unit": "G"
+   },
+   {
+    "food": "Pimiento rojo",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Calabacín",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Zanahoria",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Tomate",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Aceite de oliva",
+    "quantity": 2,
+    "unit": "TBSP"
+   }
+  ],
+  "steps": [
+   "Sofríe las verduras troceadas con el aceite.",
+   "Añade el arroz y rehógalo un minuto.",
+   "Agrega agua o caldo y cuece hasta que el arroz esté tierno."
+  ]
+ },
+ {
+  "key": "arroz-con-tomate-y-huevo",
+  "title": "Arroz con tomate y huevo",
+  "servings": 2,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Arroz blanco (crudo)",
+    "quantity": 160,
+    "unit": "G"
+   },
+   {
+    "food": "Tomate frito",
+    "quantity": 150,
+    "unit": "G"
+   },
+   {
+    "food": "Huevo de gallina",
+    "quantity": 2,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Aceite de oliva",
+    "quantity": 1,
+    "unit": "SPLASH"
+   }
+  ],
+  "steps": [
+   "Cuece el arroz.",
+   "Fríe o haz a la plancha los huevos con un chorrito de aceite hasta que la clara cuaje.",
+   "Sirve el arroz con el tomate y el huevo encima."
+  ]
+ },
+ {
+  "key": "lentejas-guisadas",
+  "title": "Lentejas guisadas",
+  "servings": 4,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Lentejas cocidas",
+    "quantity": 800,
+    "unit": "G"
+   },
+   {
+    "food": "Patata (cruda)",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Zanahoria",
+    "quantity": 2,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Cebolla",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Aceite de oliva",
+    "quantity": 2,
+    "unit": "TBSP"
+   }
+  ],
+  "steps": [
+   "Sofríe la cebolla y la zanahoria picadas con el aceite.",
+   "Añade la patata troceada, las lentejas cocidas y agua o caldo.",
+   "Cuece hasta que la patata esté tierna."
+  ]
+ },
+ {
+  "key": "ensalada-de-lentejas",
+  "title": "Ensalada de lentejas",
+  "servings": 2,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Lentejas cocidas",
+    "quantity": 400,
+    "unit": "G"
+   },
+   {
+    "food": "Tomate",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Pimiento verde",
+    "quantity": 50,
+    "unit": "G"
+   },
+   {
+    "food": "Atún al natural (escurrido)",
+    "quantity": 1,
+    "unit": "CAN"
+   },
+   {
+    "food": "Aceite de oliva",
+    "quantity": 1,
+    "unit": "TBSP"
+   }
+  ],
+  "steps": [
+   "Escurre y enjuaga las lentejas cocidas.",
+   "Pica el tomate y el pimiento y mézclalos con las lentejas y el atún.",
+   "Aliña con el aceite."
+  ]
+ },
+ {
+  "key": "garbanzos-con-espinacas",
+  "title": "Garbanzos con espinacas",
+  "servings": 4,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Garbanzos cocidos",
+    "quantity": 600,
+    "unit": "G"
+   },
+   {
+    "food": "Espinacas",
+    "quantity": 300,
+    "unit": "G"
+   },
+   {
+    "food": "Ajo",
+    "quantity": 2,
+    "unit": "CLOVE"
+   },
+   {
+    "food": "Aceite de oliva",
+    "quantity": 2,
+    "unit": "TBSP"
+   }
+  ],
+  "steps": [
+   "Dora los ajos laminados en el aceite.",
+   "Rehoga las espinacas.",
+   "Añade los garbanzos cocidos y caliéntalo todo junto."
+  ]
+ },
+ {
+  "key": "ensalada-de-garbanzos",
+  "title": "Ensalada de garbanzos",
+  "servings": 2,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Garbanzos cocidos",
+    "quantity": 400,
+    "unit": "G"
+   },
+   {
+    "food": "Tomate",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Cebolla",
+    "quantity": 0.25,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Atún al natural (escurrido)",
+    "quantity": 1,
+    "unit": "CAN"
+   },
+   {
+    "food": "Huevo de gallina",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Aceite de oliva",
+    "quantity": 1,
+    "unit": "TBSP"
+   }
+  ],
+  "steps": [
+   "Cuece el huevo hasta que esté duro.",
+   "Escurre los garbanzos y mézclalos con el tomate y la cebolla picados, el atún y el huevo troceado.",
+   "Aliña con el aceite."
+  ]
+ },
+ {
+  "key": "hummus-casero",
+  "title": "Hummus casero",
+  "servings": 4,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Garbanzos cocidos",
+    "quantity": 400,
+    "unit": "G"
+   },
+   {
+    "food": "Ajo",
+    "quantity": 1,
+    "unit": "CLOVE"
+   },
+   {
+    "food": "Aceite de oliva virgen extra",
+    "quantity": 2,
+    "unit": "TBSP"
+   }
+  ],
+  "steps": [
+   "Escurre los garbanzos (guarda un poco del líquido).",
+   "Tritura con el ajo y el aceite, añadiendo líquido hasta la textura que quieras.",
+   "Sazona al gusto."
+  ]
+ },
+ {
+  "key": "crema-de-calabacin",
+  "title": "Crema de calabacín",
+  "servings": 4,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Calabacín",
+    "quantity": 3,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Patata (cruda)",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Cebolla",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Aceite de oliva",
+    "quantity": 1,
+    "unit": "TBSP"
+   }
+  ],
+  "steps": [
+   "Trocea las verduras y cuécelas en agua hasta que estén tiernas.",
+   "Tritúralas con el aceite y sal al gusto."
+  ]
+ },
+ {
+  "key": "crema-de-zanahoria",
+  "title": "Crema de zanahoria",
+  "servings": 4,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Zanahoria",
+    "quantity": 6,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Patata (cruda)",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Cebolla",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Aceite de oliva",
+    "quantity": 1,
+    "unit": "TBSP"
+   }
+  ],
+  "steps": [
+   "Trocea las verduras y cuécelas en agua o caldo hasta que estén tiernas.",
+   "Tritura con el aceite y sal al gusto."
+  ]
+ },
+ {
+  "key": "sopa-de-pollo-con-fideos",
+  "title": "Sopa de pollo con fideos",
+  "servings": 3,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Caldo de pollo",
+    "quantity": 1000,
+    "unit": "ML"
+   },
+   {
+    "food": "Pechuga de pollo (cruda)",
+    "quantity": 200,
+    "unit": "G"
+   },
+   {
+    "food": "Fideos",
+    "quantity": 80,
+    "unit": "G"
+   },
+   {
+    "food": "Zanahoria",
+    "quantity": 1,
+    "unit": "UNIT"
+   }
+  ],
+  "steps": [
+   "Calienta el caldo con la zanahoria troceada.",
+   "Añade el pollo en trozos pequeños y cuécelo hasta que esté hecho por dentro.",
+   "Incorpora los fideos y cuece según el paquete."
+  ]
+ },
+ {
+  "key": "gazpacho",
+  "title": "Gazpacho",
+  "servings": 4,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Tomate",
+    "quantity": 1000,
+    "unit": "G"
+   },
+   {
+    "food": "Pimiento verde",
+    "quantity": 100,
+    "unit": "G"
+   },
+   {
+    "food": "Pepino",
+    "quantity": 100,
+    "unit": "G"
+   },
+   {
+    "food": "Ajo",
+    "quantity": 1,
+    "unit": "CLOVE"
+   },
+   {
+    "food": "Aceite de oliva virgen extra",
+    "quantity": 4,
+    "unit": "TBSP"
+   },
+   {
+    "food": "Vinagre de vino",
+    "quantity": 1,
+    "unit": "SPLASH"
+   }
+  ],
+  "steps": [
+   "Trocea las verduras y tritúralas con el ajo, el aceite, el vinagre y sal.",
+   "Cuela si quieres una textura fina y enfría en la nevera antes de servir."
+  ]
+ },
+ {
+  "key": "salmorejo",
+  "title": "Salmorejo",
+  "servings": 4,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Tomate",
+    "quantity": 1000,
+    "unit": "G"
+   },
+   {
+    "food": "Pan blanco",
+    "quantity": 200,
+    "unit": "G"
+   },
+   {
+    "food": "Ajo",
+    "quantity": 1,
+    "unit": "CLOVE"
+   },
+   {
+    "food": "Aceite de oliva virgen extra",
+    "quantity": 8,
+    "unit": "TBSP"
+   },
+   {
+    "food": "Jamón serrano",
+    "quantity": 50,
+    "unit": "G"
+   },
+   {
+    "food": "Huevo cocido",
+    "quantity": 110,
+    "unit": "G",
+    "note": "un par de huevos cocidos troceados"
+   }
+  ],
+  "steps": [
+   "Tritura los tomates con el pan remojado, el ajo, el aceite y sal hasta que quede cremoso.",
+   "Enfría en la nevera.",
+   "Sirve con el jamón y el huevo cocido picados por encima."
+  ]
+ },
+ {
+  "key": "ensaladilla-rusa",
+  "title": "Ensaladilla rusa",
+  "servings": 4,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Patata (cocida)",
+    "quantity": 3,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Zanahoria",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Guisantes",
+    "quantity": 100,
+    "unit": "G"
+   },
+   {
+    "food": "Atún al natural (escurrido)",
+    "quantity": 1,
+    "unit": "CAN"
+   },
+   {
+    "food": "Huevo cocido",
+    "quantity": 110,
+    "unit": "G"
+   },
+   {
+    "food": "Mayonesa",
+    "quantity": 80,
+    "unit": "G"
+   }
+  ],
+  "steps": [
+   "Cuece las patatas, la zanahoria y los guisantes y déjalos enfriar.",
+   "Trocea todo junto con el huevo cocido.",
+   "Mezcla con el atún y la mayonesa y enfría en la nevera."
+  ]
+ },
+ {
+  "key": "pisto-con-huevo",
+  "title": "Pisto con huevo",
+  "servings": 2,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Calabacín",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Pimiento rojo",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Cebolla",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Tomate triturado",
+    "quantity": 200,
+    "unit": "G"
+   },
+   {
+    "food": "Huevo de gallina",
+    "quantity": 2,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Aceite de oliva",
+    "quantity": 1,
+    "unit": "TBSP"
+   }
+  ],
+  "steps": [
+   "Sofríe la cebolla, el pimiento y el calabacín troceados con el aceite.",
+   "Añade el tomate y cocina hasta que las verduras estén tiernas.",
+   "Pon los huevos por encima y cuécelos hasta que la clara cuaje por completo."
+  ]
+ },
+ {
+  "key": "revuelto-de-espinacas",
+  "title": "Revuelto de espinacas",
+  "servings": 2,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Huevo de gallina",
+    "quantity": 4,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Espinacas",
+    "quantity": 200,
+    "unit": "G"
+   },
+   {
+    "food": "Aceite de oliva",
+    "quantity": 1,
+    "unit": "SPLASH"
+   }
+  ],
+  "steps": [
+   "Rehoga las espinacas con el aceite.",
+   "Añade los huevos batidos y remueve hasta que cuajen por completo."
+  ]
+ },
+ {
+  "key": "tortilla-francesa",
+  "title": "Tortilla francesa",
+  "servings": 1,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Huevo de gallina",
+    "quantity": 2,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Aceite de oliva",
+    "quantity": 1,
+    "unit": "SPLASH"
+   }
+  ],
+  "steps": [
+   "Bate los huevos con una pizca de sal.",
+   "Cuaja en la sartén con el aceite y dóblala cuando no quede huevo líquido."
+  ]
+ },
+ {
+  "key": "tostada-de-aguacate-y-huevo",
+  "title": "Tostada de aguacate y huevo",
+  "servings": 1,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Pan integral",
+    "quantity": 2,
+    "unit": "SLICE"
+   },
+   {
+    "food": "Aguacate",
+    "quantity": 0.5,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Huevo de gallina",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Aceite de oliva",
+    "quantity": 1,
+    "unit": "SPLASH"
+   }
+  ],
+  "steps": [
+   "Tuesta el pan y úntalo con el aguacate machacado.",
+   "Haz el huevo a la plancha con el aceite hasta que la clara cuaje y ponlo encima."
+  ]
+ },
+ {
+  "key": "tostada-con-tomate",
+  "title": "Tostada con tomate y aceite",
+  "servings": 1,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Pan blanco",
+    "quantity": 2,
+    "unit": "SLICE"
+   },
+   {
+    "food": "Tomate",
+    "quantity": 60,
+    "unit": "G"
+   },
+   {
+    "food": "Aceite de oliva",
+    "quantity": 1,
+    "unit": "TBSP"
+   }
+  ],
+  "steps": [
+   "Tuesta el pan, úntalo con el tomate rallado y añade el aceite."
+  ]
+ },
+ {
+  "key": "tostada-de-jamon-y-tomate",
+  "title": "Tostada de jamón y tomate",
+  "servings": 1,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Pan blanco",
+    "quantity": 2,
+    "unit": "SLICE"
+   },
+   {
+    "food": "Tomate",
+    "quantity": 60,
+    "unit": "G"
+   },
+   {
+    "food": "Jamón serrano",
+    "quantity": 30,
+    "unit": "G"
+   },
+   {
+    "food": "Aceite de oliva",
+    "quantity": 1,
+    "unit": "SPLASH"
+   }
+  ],
+  "steps": [
+   "Tuesta el pan, añade el tomate rallado, el jamón y un chorrito de aceite."
+  ]
+ },
+ {
+  "key": "tostada-de-cacahuete-y-platano",
+  "title": "Tostada de crema de cacahuete y plátano",
+  "servings": 1,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Pan integral",
+    "quantity": 2,
+    "unit": "SLICE"
+   },
+   {
+    "food": "Crema de cacahuete",
+    "quantity": 20,
+    "unit": "G"
+   },
+   {
+    "food": "Plátano",
+    "quantity": 1,
+    "unit": "UNIT"
+   }
+  ],
+  "steps": [
+   "Tuesta el pan, úntalo con la crema de cacahuete y añade el plátano en rodajas."
+  ]
+ },
+ {
+  "key": "avena-con-leche-y-platano",
+  "title": "Avena con leche y plátano",
+  "servings": 1,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Copos de avena",
+    "quantity": 50,
+    "unit": "G"
+   },
+   {
+    "food": "Leche semidesnatada",
+    "quantity": 1,
+    "unit": "GLASS"
+   },
+   {
+    "food": "Plátano",
+    "quantity": 1,
+    "unit": "UNIT"
+   }
+  ],
+  "steps": [
+   "Calienta la leche con la avena removiendo.",
+   "Añade el plátano en rodajas."
+  ]
+ },
+ {
+  "key": "porridge-de-manzana-y-canela",
+  "title": "Porridge de manzana y canela",
+  "servings": 1,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Copos de avena",
+    "quantity": 40,
+    "unit": "G"
+   },
+   {
+    "food": "Leche semidesnatada",
+    "quantity": 1,
+    "unit": "GLASS"
+   },
+   {
+    "food": "Manzana",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Canela",
+    "quantity": 1,
+    "unit": "G"
+   }
+  ],
+  "steps": [
+   "Calienta la leche con la avena removiendo hasta que espese.",
+   "Añade la manzana troceada y la canela."
+  ]
+ },
+ {
+  "key": "tortitas-de-avena-y-platano",
+  "title": "Tortitas de avena y plátano",
+  "servings": 1,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Plátano",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Huevo de gallina",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Copos de avena",
+    "quantity": 40,
+    "unit": "G"
+   }
+  ],
+  "steps": [
+   "Machaca el plátano y mézclalo con el huevo y la avena.",
+   "Cocina pequeñas porciones en una sartén antiadherente por ambos lados hasta que el huevo esté cuajado."
+  ]
+ },
+ {
+  "key": "yogur-con-fresas-y-nueces",
+  "title": "Yogur griego con fresas y nueces",
+  "servings": 1,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Yogur griego",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Fresa",
+    "quantity": 100,
+    "unit": "G"
+   },
+   {
+    "food": "Nueces",
+    "quantity": 15,
+    "unit": "G"
+   }
+  ],
+  "steps": [
+   "Pon el yogur en un cuenco con las fresas troceadas y las nueces por encima."
+  ]
+ },
+ {
+  "key": "batido-de-platano-y-yogur",
+  "title": "Batido de plátano, fresa y yogur",
+  "servings": 1,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Yogur natural",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Plátano",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Fresa",
+    "quantity": 100,
+    "unit": "G"
+   }
+  ],
+  "steps": [
+   "Tritura todo hasta que quede cremoso y sirve frío."
+  ]
+ },
+ {
+  "key": "macedonia",
+  "title": "Macedonia de frutas",
+  "servings": 2,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Manzana",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Naranja",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Plátano",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Fresa",
+    "quantity": 100,
+    "unit": "G"
+   },
+   {
+    "food": "Uva",
+    "quantity": 100,
+    "unit": "G"
+   }
+  ],
+  "steps": [
+   "Pela y trocea la fruta.",
+   "Mezcla y sirve fría."
+  ]
+ },
+ {
+  "key": "salmon-con-patata",
+  "title": "Salmón con patata",
+  "servings": 2,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Salmón",
+    "quantity": 300,
+    "unit": "G"
+   },
+   {
+    "food": "Patata (cocida)",
+    "quantity": 300,
+    "unit": "G"
+   },
+   {
+    "food": "Aceite de oliva",
+    "quantity": 1,
+    "unit": "SPLASH"
+   }
+  ],
+  "steps": [
+   "Cocina el salmón a la plancha o en la freidora de aire hasta que esté hecho por dentro.",
+   "Sírvelo con la patata cocida."
+  ]
+ },
+ {
+  "key": "merluza-al-horno-con-patatas",
+  "title": "Merluza al horno con patatas",
+  "servings": 2,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Merluza",
+    "quantity": 400,
+    "unit": "G"
+   },
+   {
+    "food": "Patata (cruda)",
+    "quantity": 2,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Cebolla",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Aceite de oliva",
+    "quantity": 1,
+    "unit": "TBSP"
+   }
+  ],
+  "steps": [
+   "Corta las patatas y la cebolla en láminas y colócalas en una bandeja con el aceite.",
+   "Hornea hasta que estén casi tiernas (según tu horno).",
+   "Pon la merluza encima y termina de hornear hasta que esté hecha por dentro."
+  ]
+ },
+ {
+  "key": "pollo-al-ajillo",
+  "title": "Pollo al ajillo",
+  "servings": 3,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Pechuga de pollo (cruda)",
+    "quantity": 500,
+    "unit": "G"
+   },
+   {
+    "food": "Ajo",
+    "quantity": 4,
+    "unit": "CLOVE"
+   },
+   {
+    "food": "Aceite de oliva",
+    "quantity": 2,
+    "unit": "TBSP"
+   }
+  ],
+  "steps": [
+   "Trocea el pollo y sazónalo.",
+   "Dóralo en el aceite con los ajos laminados hasta que esté bien hecho por dentro."
+  ]
+ },
+ {
+  "key": "pollo-con-arroz-al-curry",
+  "title": "Pollo al curry con arroz",
+  "servings": 3,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Pechuga de pollo (cruda)",
+    "quantity": 500,
+    "unit": "G"
+   },
+   {
+    "food": "Cebolla",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Curry",
+    "quantity": 5,
+    "unit": "G"
+   },
+   {
+    "food": "Arroz basmati",
+    "quantity": 200,
+    "unit": "G"
+   },
+   {
+    "food": "Aceite de oliva",
+    "quantity": 1,
+    "unit": "TBSP"
+   }
+  ],
+  "steps": [
+   "Sofríe la cebolla picada con el aceite.",
+   "Añade el pollo troceado y el curry y cocina hasta que esté hecho por dentro.",
+   "Cuece el arroz y sírvelo con el pollo."
+  ]
+ },
+ {
+  "key": "albondigas-en-salsa",
+  "title": "Albóndigas en salsa de tomate",
+  "servings": 4,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Carne picada mixta",
+    "quantity": 400,
+    "unit": "G"
+   },
+   {
+    "food": "Huevo de gallina",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Pan rallado",
+    "quantity": 30,
+    "unit": "G"
+   },
+   {
+    "food": "Ajo",
+    "quantity": 1,
+    "unit": "CLOVE"
+   },
+   {
+    "food": "Tomate triturado",
+    "quantity": 300,
+    "unit": "G"
+   },
+   {
+    "food": "Cebolla",
+    "quantity": 1,
+    "unit": "UNIT"
+   }
+  ],
+  "steps": [
+   "Mezcla la carne con el huevo, el pan rallado y el ajo picado y forma bolas.",
+   "Dóralas en una sartén.",
+   "Sofríe la cebolla, añade el tomate y cuece las albóndigas en la salsa hasta que estén hechas por dentro."
+  ]
+ },
+ {
+  "key": "hamburguesa-casera",
+  "title": "Hamburguesa casera con ensalada",
+  "servings": 1,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Carne picada de vacuno",
+    "quantity": 150,
+    "unit": "G"
+   },
+   {
+    "food": "Pan de hamburguesa",
+    "quantity": 60,
+    "unit": "G"
+   },
+   {
+    "food": "Lechuga",
+    "quantity": 50,
+    "unit": "G"
+   },
+   {
+    "food": "Tomate",
+    "quantity": 0.5,
+    "unit": "UNIT"
+   }
+  ],
+  "steps": [
+   "Forma la hamburguesa y cocínala a la plancha por ambos lados hasta que no quede rosada por dentro.",
+   "Monta en el pan con la lechuga y el tomate."
+  ]
+ },
+ {
+  "key": "brocoli-salteado-con-ajo",
+  "title": "Brócoli salteado con ajo",
+  "servings": 2,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Brócoli",
+    "quantity": 400,
+    "unit": "G"
+   },
+   {
+    "food": "Ajo",
+    "quantity": 2,
+    "unit": "CLOVE"
+   },
+   {
+    "food": "Aceite de oliva",
+    "quantity": 1,
+    "unit": "TBSP"
+   }
+  ],
+  "steps": [
+   "Cuece el brócoli al vapor o en agua hasta que esté tierno.",
+   "Saltéalo con el ajo laminado y el aceite."
+  ]
+ },
+ {
+  "key": "judias-verdes-con-patata",
+  "title": "Judías verdes con patata",
+  "servings": 2,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Judías verdes",
+    "quantity": 300,
+    "unit": "G"
+   },
+   {
+    "food": "Patata (cruda)",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Aceite de oliva",
+    "quantity": 1,
+    "unit": "TBSP"
+   }
+  ],
+  "steps": [
+   "Cuece las judías y la patata troceada hasta que estén tiernas.",
+   "Escurre y aliña con el aceite."
+  ]
+ },
+ {
+  "key": "boniato-asado",
+  "title": "Boniato asado",
+  "servings": 2,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Boniato",
+    "quantity": 2,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Aceite de oliva",
+    "quantity": 1,
+    "unit": "SPLASH"
+   }
+  ],
+  "steps": [
+   "Lava el boniato y córtalo en trozos con un chorrito de aceite.",
+   "Hornea o cocina en la freidora de aire hasta que esté tierno por dentro."
+  ]
+ },
+ {
+  "key": "ensalada-de-pasta",
+  "title": "Ensalada de pasta",
+  "servings": 2,
+  "description": null,
+  "ingredients": [
+   {
+    "food": "Macarrones (secos)",
+    "quantity": 100,
+    "unit": "G"
+   },
+   {
+    "food": "Tomate",
+    "quantity": 1,
+    "unit": "UNIT"
+   },
+   {
+    "food": "Atún al natural (escurrido)",
+    "quantity": 1,
+    "unit": "CAN"
+   },
+   {
+    "food": "Maíz dulce",
+    "quantity": 50,
+    "unit": "G"
+   },
+   {
+    "food": "Aceite de oliva",
+    "quantity": 1,
+    "unit": "TBSP"
+   }
+  ],
+  "steps": [
+   "Cuece la pasta, escúrrela y enfríala.",
+   "Mezcla con el tomate troceado, el atún y el maíz y aliña con el aceite."
+  ]
+ }
 ]

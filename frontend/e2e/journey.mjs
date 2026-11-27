@@ -108,10 +108,36 @@ try {
   const cat = await page.locator('main').innerText();
   check('el catálogo encuentra «batata» como Boniato y avisa de que es aproximado y sin verificar', /Boniato/.test(cat) && /sin verificar/.test(cat));
   await page.getByRole('link', { name: 'Recetas' }).click();
-  await page.getByRole('button', { name: 'Añadir a mis recetas' }).first().click();
+  await page.getByRole('tab', { name: /Recetas típicas/ }).click();
+  await page.getByLabel('Buscar receta').fill('garbanzos');
+  await page.waitForSelector('text=Garbanzos con espinacas');
+  check('las recetas típicas se buscan por ingrediente (garbanzos)', (await page.locator('.results li').count()) >= 3);
+  await page.getByLabel('Buscar receta').fill('tortilla de patatas');
+  await page.getByRole('link', { name: /Tortilla de patatas/ }).first().click();
   await page.waitForSelector('h1:has-text("Tortilla de patatas")');
+  const tpl = await page.locator('main').innerText();
+  check('la receta típica usa medidas naturales (unidades grandes, chorrito) y pasos con alternativas', /unidades grandes/.test(tpl) && /chorrito/.test(tpl) && /freidora de aire/.test(tpl), tpl.slice(0, 160).replace(/\s+/g, ' '));
+  await page.getByRole('button', { name: /Adaptar y guardar/ }).click();
+  await page.waitForSelector('h1:has-text("Editar receta")');
+  await page.locator('article.card', { hasText: 'Cebolla' }).getByRole('button', { name: 'Quitar' }).click();
+  await page.getByLabel('Nombre').fill('Tortilla de patatas sin cebolla');
+  await page.getByRole('button', { name: 'Guardar cambios' }).click();
+  await page.waitForSelector('h1:has-text("Tortilla de patatas sin cebolla")');
   const tort = await page.locator('main').innerText();
-  check('una receta típica se copia y se calcula con el catálogo (tortilla ≈ 329 kcal/ración)', /329 kcal/.test(tort), tort.split('\n').find((l) => /kcal/.test(l)) ?? '');
+  check('adaptar una receta típica: sin cebolla, con otro nombre, guardada en Mis recetas (≈ 2xx kcal/ración)', !/Cebolla/.test(tort.split('Pasos')[0]) && /\d{3} kcal/.test(tort), tort.split('\n').find((l) => /kcal/.test(l)) ?? '');
+  await page.getByLabel('Fecha').fill('2026-11-20');
+  await page.getByRole('button', { name: 'Registrar', exact: true }).click();
+  await page.waitForSelector('h2:has-text("Total del día")');
+  check('registrar una ración de mi receta en otra fecha (20/11/2026)', /20/.test(page.url()) && /Tortilla de patatas sin cebolla/.test(await page.locator('main').innerText()), page.url());
+  await page.getByRole('link', { name: 'Alimentos' }).click();
+  await page.getByLabel('Buscar').fill('helado de chocolate');
+  await page.getByRole('link', { name: /Helado de chocolate/ }).first().click();
+  await page.getByRole('link', { name: 'Registrar en el diario' }).click();
+  await page.waitForSelector('h2:has-text("Helado de chocolate")');
+  await page.getByRole('button', { name: 'Añadir a la comida' }).click();
+  await page.getByRole('button', { name: 'Guardar en el diario' }).click();
+  await page.waitForSelector('h2:has-text("Total del día")');
+  check('registrar un alimento desde su ficha (helado de chocolate)', /Helado de chocolate/.test(await page.locator('main').innerText()));
 
   // 5c) Categorías con imagen, alimento sin datos y valores propios
   await page.locator('nav.tabbar a', { hasText: 'Alimentos' }).click();

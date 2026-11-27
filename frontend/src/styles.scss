@@ -121,3 +121,10 @@ summary { cursor: pointer; font-weight: 600; min-height: var(--tap); display: fl
 }
 .tile .icon { font-size: 2rem; width: auto; }
 .tile:hover { border-color: var(--accent); }
+
+.chips { display: flex; gap: .4rem; flex-wrap: wrap; margin: .25rem 0 .5rem; }
+.chip { border: 1px solid var(--border); background: transparent; color: inherit; border-radius: 999px; padding: .25rem .8rem; min-height: 2.25rem; font: inherit; cursor: pointer; }
+.chip:hover, .chip[aria-pressed='true'] { border-color: var(--accent); }
+.tabs { display: flex; gap: .5rem; margin: .5rem 0 1rem; }
+.tabs button { flex: 1; min-height: 2.75rem; border: 1px solid var(--border); background: transparent; color: inherit; border-radius: .6rem; font: inherit; cursor: pointer; }
+.tabs button[aria-selected='true'] { border-color: var(--accent); font-weight: 600; }

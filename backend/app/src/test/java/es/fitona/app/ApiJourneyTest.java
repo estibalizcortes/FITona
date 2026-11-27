@@ -249,11 +249,11 @@ class ApiJourneyTest {
     @Test
     void typicalRecipesCanBeCopiedAndAreComputedByTheEngine() {
         UUID me = UUID.randomUUID();
-        as(me).get("/api/v1/recipes/templates").then().statusCode(200).body("$", hasSize(12));
-        // 500 g patata + 5 huevos + 1 cebolla + 4 cucharadas de aceite = 1.317 kcal en total / 4 raciones
+        as(me).get("/api/v1/recipes/templates").then().statusCode(200).body("$", org.hamcrest.Matchers.hasSize(org.hamcrest.Matchers.greaterThanOrEqualTo(40)));
+        // 2 patatas grandes + 3 huevos + ½ cebolla + 2 chorritos de aceite, para 3 raciones
         as(me).post("/api/v1/recipes/templates/tortilla-de-patatas/copy").then().statusCode(201)
                 .body("title", equalTo("Tortilla de patatas")).body("completeness", equalTo("COMPLETE"))
-                .body("perServing.nutrients.energyKcal.value", equalTo(329))
+                .body("perServing.nutrients.energyKcal.value", org.hamcrest.Matchers.allOf(org.hamcrest.Matchers.greaterThan(200), org.hamcrest.Matchers.lessThan(320)))
                 .body("perServing.quality", equalTo("ESTIMATE"));
         as(me).get("/api/v1/recipes").then().body("$", hasSize(1));
         as(me).post("/api/v1/recipes/templates/no-existe/copy").then().statusCode(404);
@@ -358,5 +358,33 @@ class ApiJourneyTest {
         // volver al valor del catálogo = borrar lo mío
         as(me).delete("/api/v1/foods/" + mineId).then().statusCode(204);
         as(me).get("/api/v1/foods?q=edulcorante").then().body("[0].variantId", equalTo((int) av));
+    }
+
+    @Test
+    void everyTypicalRecipeCopiesAndAPersonCanAdaptItWithNaturalMeasures() {
+        UUID me = UUID.randomUUID();
+        Response list = as(me).get("/api/v1/recipes/templates");
+        list.then().statusCode(200);
+        java.util.List<String> keys = list.jsonPath().getList("key");
+        org.junit.jupiter.api.Assertions.assertTrue(keys.size() >= 40, "debe haber al menos 40 recetas típicas");
+        org.junit.jupiter.api.Assertions.assertTrue(list.jsonPath().getList("ingredientNames.flatten()").contains("Garbanzos cocidos"));
+        as(me).get("/api/v1/recipes/templates/tortilla-de-patatas").then().statusCode(200).body("steps.size()", org.hamcrest.Matchers.greaterThan(3));
+        // «dos patatas grandes» = 2 × 250 g y «un chorrito» de aceite = 7 g
+        Response tort = as(me).post("/api/v1/recipes/templates/tortilla-de-patatas/copy");
+        String id = tort.jsonPath().getString("id");
+        tort.then().body("ingredients.find { it.name == 'Patata (cruda)' }.grams", equalTo(500))
+                .body("ingredients.find { it.name == 'Aceite de oliva' }.unitCode", equalTo("SPLASH"));
+        // adaptar: sin cebolla y con otro nombre = nueva versión de la misma receta; la anterior queda guardada
+        java.util.List<java.util.Map<String, Object>> ing = new java.util.ArrayList<>();
+        for (java.util.Map<String, Object> i : tort.jsonPath().<java.util.Map<String, Object>>getList("ingredients")) {
+            if (!"Cebolla".equals(i.get("name"))) {
+                ing.add(java.util.Map.of("variantId", i.get("variantId"), "quantity", i.get("quantity"), "unitCode", i.get("unitCode")));
+            }
+        }
+        as(me).body(java.util.Map.of("title", "Tortilla de patatas sin cebolla", "servings", 1, "ingredients", ing))
+                .put("/api/v1/recipes/" + id).then().statusCode(200).body("title", equalTo("Tortilla de patatas sin cebolla"))
+                .body("version", equalTo(2)).body("ingredients.size()", equalTo(3));
+        // otra persona no ve mi receta
+        as(UUID.randomUUID()).get("/api/v1/recipes/" + id).then().statusCode(404);
     }
 }

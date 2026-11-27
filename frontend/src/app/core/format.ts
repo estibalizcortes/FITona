@@ -74,3 +74,32 @@ export const SLOT_NAMES: Record<string, string> = {
   BREAKFAST: 'Desayuno', MID_MORNING: 'Media mañana', LUNCH: 'Comida', AFTERNOON_SNACK: 'Merienda',
   DINNER: 'Cena', OTHER: 'Otra',
 };
+
+const FRACTIONS: Record<string, number> = { '½': 0.5, '¼': 0.25, '¾': 0.75, '⅓': 1 / 3, '⅔': 2 / 3 };
+
+/** Cantidad escrita a mano: «2», «1,5», «1/2», «½», «1 1/2». Devuelve NaN si no se entiende. */
+export function parseQty(text: string): number {
+  const t = text.trim().replace(',', '.');
+  if (!t) return NaN;
+  let total = 0;
+  for (const part of t.split(/\s+/)) {
+    const f = FRACTIONS[part];
+    const m = /^(\d+(?:\.\d+)?)\/(\d+)$/.exec(part);
+    if (f !== undefined) total += f;
+    else if (m) { if (Number(m[2]) === 0) return NaN; total += Number(m[1]) / Number(m[2]); }
+    else if (/^\d+(?:\.\d+)?$/.test(part)) total += Number(part);
+    else return NaN;
+  }
+  return total;
+}
+
+/** Cantidad para mostrar con fracciones habituales: 0.5 -> «½», 1.5 -> «1 ½». */
+export function showQty(q: number): string {
+  const whole = Math.floor(q + 1e-9);
+  const frac = q - whole;
+  const names: [number, string][] = [[0.25, '¼'], [0.5, '½'], [0.75, '¾']];
+  const hit = names.find(([v]) => Math.abs(frac - v) < 0.01);
+  if (Math.abs(frac) < 0.01) return String(whole);
+  if (hit) return whole === 0 ? hit[1] : `${whole} ${hit[1]}`;
+  return String(Math.round(q * 100) / 100);
+}

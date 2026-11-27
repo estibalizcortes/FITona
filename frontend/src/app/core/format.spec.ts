@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { approxPrefix, formatValue, hasFigures, reliability, shiftDate } from './format';
+import { approxPrefix, formatValue, hasFigures, parseQty, reliability, shiftDate, showQty } from './format';
 import { Totals } from './models';
 
 function totals(kcal: number | null, complete: boolean, quality: string, precision: string): Totals {
@@ -46,5 +46,26 @@ describe('format', () => {
   it('desplaza fechas sin errores de mes', () => {
     expect(shiftDate('2026-11-30', 1)).toBe('2026-12-01');
     expect(shiftDate('2026-03-01', -1)).toBe('2026-02-28');
+  });
+});
+
+describe('cantidades escritas a mano', () => {
+  it('entiende enteros, comas, fracciones y mixtos', () => {
+    expect(parseQty('2')).toBe(2);
+    expect(parseQty('1,5')).toBe(1.5);
+    expect(parseQty('1/2')).toBe(0.5);
+    expect(parseQty('½')).toBe(0.5);
+    expect(parseQty('1 1/2')).toBe(1.5);
+  });
+  it('rechaza lo que no es una cantidad', () => {
+    expect(parseQty('')).toBeNaN();
+    expect(parseQty('dos')).toBeNaN();
+    expect(parseQty('1/0')).toBeNaN();
+  });
+  it('muestra fracciones habituales', () => {
+    expect(showQty(0.5)).toBe('½');
+    expect(showQty(1.25)).toBe('1 ¼');
+    expect(showQty(3)).toBe('3');
+    expect(showQty(2.3)).toBe('2.3');
   });
 });

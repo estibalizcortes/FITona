@@ -44,6 +44,12 @@ public class RecipeResource {
         return templates.list();
     }
 
+    @GET
+    @Path("/templates/{key}")
+    public RecipeTemplates.Template template(@PathParam("key") String key) {
+        return templates.get(key);
+    }
+
     @POST
     @Path("/templates/{key}/copy")
     public Response copyTemplate(@PathParam("key") String key) {

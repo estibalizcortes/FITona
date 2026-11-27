@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, si
 import { Router, RouterLink } from '@angular/router';
 import { Api, errorMessage } from '../core/api';
 import { newUuid } from '../core/identity';
-import { SLOT_NAMES, slotForNow, todayIso, unitLabel } from '../core/format';
+import { SLOT_NAMES, parseQty, slotForNow, todayIso, unitLabel } from '../core/format';
 import { CalcResponse, Food, ItemRequest, RecipeSummary, Reference } from '../core/models';
 import { FoodPicker } from '../shared/food-picker';
 import { TotalsView } from '../shared/totals-view';
@@ -47,7 +47,7 @@ interface DraftItem { label: string; req: ItemRequest }
           <div class="row">
             <label class="field">
               <span>Cantidad</span>
-              <input type="number" inputmode="decimal" min="0" step="any" [value]="qty()" (input)="qty.set($any($event.target).value)" />
+              <input type="text" inputmode="decimal" aria-label="Cantidad" [value]="qty()" (input)="qty.set($any($event.target).value)" />
             </label>
             <label class="field">
               <span>Unidad</span>
@@ -92,7 +92,7 @@ interface DraftItem { label: string; req: ItemRequest }
             </label>
             <label class="field">
               <span>Raciones</span>
-              <input type="number" min="0" step="any" [value]="servings()" (input)="servings.set($any($event.target).value)" />
+              <input type="text" inputmode="decimal" aria-label="Raciones" [value]="servings()" (input)="servings.set($any($event.target).value)" />
             </label>
             <button type="button" class="btn" (click)="addRecipe()" [disabled]="!recipeId()">Añadir receta</button>
           </details>
@@ -128,6 +128,8 @@ interface DraftItem { label: string; req: ItemRequest }
 export class AddPage implements OnInit {
   readonly date = input<string | undefined>();
   readonly slotParam = input<string | undefined>(undefined, { alias: 'slot' });
+  /** Alimento preseleccionado (desde la ficha del alimento): ?food=<variantId>. */
+  readonly food = input<string | undefined>();
 
   private readonly api = inject(Api);
   private readonly router = inject(Router);
@@ -158,6 +160,7 @@ export class AddPage implements OnInit {
     try {
       this.reference = await this.api.reference();
       this.recipes.set(await this.api.recipes());
+      if (this.food()) this.pick(await this.api.getFood(Number(this.food())));
     } catch (e) { this.error.set(errorMessage(e)); }
   }
 
@@ -190,7 +193,7 @@ export class AddPage implements OnInit {
 
   protected async addSelected(): Promise<void> {
     const f = this.selected();
-    const q = Number(this.qty());
+    const q = parseQty(this.qty());
     if (!f || !Number.isFinite(q) || q <= 0) { this.error.set('Indica una cantidad mayor que 0.'); return; }
     await this.push({ label: `${f.displayName} · ${q} ${unitLabel(this.reference?.units, this.unit(), q)}`, req: { variantId: f.variantId, quantity: q, unitCode: this.unit() } });
     this.selected.set(null);
@@ -205,7 +208,7 @@ export class AddPage implements OnInit {
 
   protected async addRecipe(): Promise<void> {
     const r = this.recipes().find((x) => x.id === this.recipeId());
-    const s = Number(this.servings());
+    const s = parseQty(this.servings());
     if (!r || !Number.isFinite(s) || s <= 0) { this.error.set('Indica las raciones (mayor que 0).'); return; }
     await this.push({ label: `${r.title} · ${s} ración(es)`, req: { recipeId: r.id, servings: s } });
     this.recipeId.set('');

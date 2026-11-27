@@ -22,11 +22,13 @@ import java.util.UUID;
 @ApplicationScoped
 public class RecipeTemplates {
 
-    public record Ingredient(String food, String label, BigDecimal quantity, String unit) {}
+    public record Ingredient(String food, String label, BigDecimal quantity, String unit, String note) {}
 
-    public record Template(String key, String title, BigDecimal servings, List<Ingredient> ingredients, List<String> steps) {}
+    public record Template(String key, String title, String description, BigDecimal servings, List<Ingredient> ingredients,
+                           List<String> steps) {}
 
-    public record Summary(String key, String title, BigDecimal servings, int ingredients) {}
+    /** ingredientNames permite buscar «garbanzos» en las recetas típicas sin abrirlas. */
+    public record Summary(String key, String title, BigDecimal servings, int ingredients, List<String> ingredientNames) {}
 
     @Inject
     ObjectMapper mapper;
@@ -49,22 +51,27 @@ public class RecipeTemplates {
     }
 
     public List<Summary> list() {
-        return templates.stream().map(t -> new Summary(t.key(), t.title(), t.servings(), t.ingredients().size())).toList();
+        return templates.stream().map(t -> new Summary(t.key(), t.title(), t.servings(), t.ingredients().size(),
+                t.ingredients().stream().map(Ingredient::food).toList())).toList();
+    }
+
+    public Template get(String key) {
+        return templates.stream().filter(x -> x.key().equals(key)).findFirst().orElseThrow(NotFoundException::new);
     }
 
     /** Copia la plantilla a las recetas de la persona. Si falta algún alimento en el catálogo, falla sin crear nada. */
     public RecipeDto copy(UUID user, String key) {
-        Template t = templates.stream().filter(x -> x.key().equals(key)).findFirst().orElseThrow(NotFoundException::new);
+        Template t = get(key);
         List<RecipeRequest.Ingredient> ing = new ArrayList<>();
         for (Ingredient i : t.ingredients()) {
             Long variant = foods.findCatalogVariantId(i.food(), i.label());
             if (variant == null) {
                 throw new IllegalArgumentException("Falta en el catálogo: " + i.food() + (i.label() == null ? "" : " (" + i.label() + ")"));
             }
-            ing.add(new RecipeRequest.Ingredient(variant, null, i.quantity(), i.unit(), null));
+            ing.add(new RecipeRequest.Ingredient(variant, null, i.quantity(), i.unit(), i.note()));
         }
         List<RecipeRequest.Step> steps = t.steps().stream().map(s -> new RecipeRequest.Step(s, null)).toList();
-        return recipes.create(user, new RecipeRequest(t.title(), "Receta típica de ejemplo: cantidades orientativas.",
+        return recipes.create(user, new RecipeRequest(t.title(), t.description() != null ? t.description() : "Receta típica de ejemplo: cantidades orientativas.",
                 t.servings(), null, null, ing, steps));
     }
 }

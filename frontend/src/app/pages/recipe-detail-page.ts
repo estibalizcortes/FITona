@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, input, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { Api, errorMessage } from '../core/api';
-import { SLOT_NAMES, slotForNow, todayIso, unitLabel } from '../core/format';
+import { SLOT_NAMES, parseQty, showQty, slotForNow, todayIso, unitLabel } from '../core/format';
 import { Recipe, Unit } from '../core/models';
 import { TotalsView } from '../shared/totals-view';
 
@@ -15,6 +15,10 @@ import { TotalsView } from '../shared/totals-view';
       @if (recipe(); as r) {
         <h1>{{ r.title }}</h1>
         <p class="muted">{{ r.servings }} raciones · versión {{ r.version }}</p>
+        <div class="actions">
+          <a class="btn" [routerLink]="['/recetas', r.id, 'editar']">Editar</a>
+          <a class="btn" [routerLink]="['/recetas', r.id, 'editar']" [queryParams]="{ copiar: 1 }">Guardar una versión mía con otro nombre</a>
+        </div>
         @if (r.completeness !== 'COMPLETE') {
           <p class="warn" role="status">Hay ingredientes sin datos nutricionales: los valores son un mínimo, no el total real.</p>
         }
@@ -24,7 +28,7 @@ import { TotalsView } from '../shared/totals-view';
         <h2>Ingredientes</h2>
         <ul class="items">
           @for (i of r.ingredients; track $index) {
-            <li>{{ i.name }}@if (i.quantity !== null) { <span class="muted"> · {{ i.quantity }} {{ unitName(i.unitCode, i.quantity) }}@if (i.grams !== null) { (≈ {{ i.grams }} g) }</span> }</li>
+            <li>{{ i.name }}@if (i.quantity !== null) { <span class="muted"> · {{ show(i.quantity) }} {{ unitName(i.unitCode, i.quantity) }}@if (i.grams !== null) { (≈ {{ i.grams }} g) }@if (i.note) { · {{ i.note }} }</span> }</li>
           }
         </ul>
         @if (r.steps.length > 0) {
@@ -36,8 +40,12 @@ import { TotalsView } from '../shared/totals-view';
           <h2>Registrar en el diario</h2>
           <div class="row">
             <label class="field">
-              <span>Raciones</span>
-              <input type="number" min="0" step="any" [value]="servings()" (input)="servings.set($any($event.target).value)" />
+              <span>Raciones (p. ej. 1, ½, 2)</span>
+              <input type="text" inputmode="decimal" aria-label="Raciones" [value]="servings()" (input)="servings.set($any($event.target).value)" />
+            </label>
+            <label class="field">
+              <span>Fecha</span>
+              <input type="date" aria-label="Fecha" [value]="date()" (change)="date.set($any($event.target).value)" />
             </label>
             <label class="field">
               <span>Comida</span>
@@ -62,6 +70,7 @@ export class RecipeDetailPage implements OnInit {
   protected readonly recipe = signal<Recipe | null>(null);
   protected readonly error = signal('');
   protected readonly servings = signal('1');
+  protected readonly date = signal(todayIso());
   protected readonly slot = signal(slotForNow());
   protected readonly slots = Object.entries(SLOT_NAMES);
   protected readonly saving = signal(false);
@@ -71,15 +80,16 @@ export class RecipeDetailPage implements OnInit {
     try { this.units.set((await this.api.reference()).units); this.recipe.set(await this.api.recipe(this.id())); } catch (e) { this.error.set(errorMessage(e)); }
   }
 
+  protected show(q: number | null): string { return q === null ? '' : showQty(q); }
   protected unitName(code: string | null, qty: number | null): string { return unitLabel(this.units(), code, qty); }
 
   protected async log(): Promise<void> {
-    const s = Number(this.servings());
+    const s = parseQty(this.servings());
     if (!Number.isFinite(s) || s <= 0) { this.error.set('Indica las raciones (mayor que 0).'); return; }
     this.saving.set(true); this.error.set('');
     try {
-      await this.api.createEntry({ date: todayIso(), mealSlot: this.slot(), items: [{ recipeId: this.id(), servings: s }] });
-      await this.router.navigate(['/hoy']);
+      await this.api.createEntry({ date: this.date() || todayIso(), mealSlot: this.slot(), items: [{ recipeId: this.id(), servings: s }] });
+      await this.router.navigate(['/hoy'], { queryParams: { date: this.date() } });
     } catch (e) { this.error.set(errorMessage(e)); } finally { this.saving.set(false); }
   }
 

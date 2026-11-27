@@ -79,3 +79,11 @@ node e2e/journey.mjs                                                   # recorri
 ## Correcciones tras el sondeo de fallos (27-nov-2026)
 
 Corregidos y con prueba: cantidades absurdas (antes 500 al guardar → ahora 400 con mensaje), reintentos simultáneos con el mismo id (ahora todos 201 y un solo registro), identidad de desarrollo en contextos no seguros (ya no existe el id fijo compartido), fecha inválida (400), Swagger UI fuera del contenedor, mensajes de unidad en español, orden de comprobaciones al borrar alimentos del catálogo (404 siempre) y topes de tamaño de listas. La app ya incluye manifiesto e iconos (instalable en el móvil); **no** hay service worker (sin conexión) todavía.
+
+## Recetas: Mis recetas / Recetas típicas (27-nov-2026)
+
+- **Implementado y probado** (backend 42/42, frontend 12/12, E2E 22/22): pestañas «Mis recetas» y «Recetas típicas» con buscador (por nombre o ingrediente, sin tildes); 44 recetas típicas con medidas naturales y pasos con alternativas (freidora de aire/olla, yogur griego casero, bol de yogur con avena); ficha de la receta típica y «Adaptar» (copia a Mis recetas y abre el editor); **editar receta** (nombre, ingredientes —quitar cebolla—, cantidades, pasos), «Guardar cambios» (nueva versión) o «Guardar como receta nueva» / «versión mía con otro nombre»; cantidades escritas como «½», «1/2», «1,5»; registrar una ración en **cualquier fecha**; registrar un alimento desde su ficha.
+- **Medidas caseras** (V013): unidad pequeña/grande, chorrito, pizca, diente, onza y cucharadas de semillas. Los gramos son **aproximados** (se marcan como cantidad aproximada) y solo existen para los alimentos listados en `V013`; en el resto se usan gramos.
+- Los tiempos/temperaturas de los pasos (p. ej. freidora de aire a unos 195 °C durante 10-12 min, yogur 24-48 h) son **los que indicó la propietaria**, marcados como orientativos; no proceden de una fuente verificada.
+- **Pendiente:** sustituir un ingrediente directamente en el editor (hoy: quitar y añadir otro), vista de calorías en la ficha de la receta típica antes de copiarla, más recetas y fotos.
+

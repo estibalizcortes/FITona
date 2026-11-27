@@ -9,6 +9,8 @@ export const routes: Routes = [
   { path: 'alimentos/:id', title: 'Editar alimento · FITona', loadComponent: () => import('./pages/food-form-page').then((m) => m.FoodFormPage) },
   { path: 'recetas', title: 'Recetas · FITona', loadComponent: () => import('./pages/recipes-page').then((m) => m.RecipesPage) },
   { path: 'recetas/nueva', title: 'Nueva receta · FITona', loadComponent: () => import('./pages/recipe-form-page').then((m) => m.RecipeFormPage) },
+  { path: 'recetas/tipicas/:key', title: 'Receta típica · FITona', loadComponent: () => import('./pages/template-detail-page').then((m) => m.TemplateDetailPage) },
+  { path: 'recetas/:id/editar', title: 'Editar receta · FITona', loadComponent: () => import('./pages/recipe-form-page').then((m) => m.RecipeFormPage) },
   { path: 'recetas/:id', title: 'Receta · FITona', loadComponent: () => import('./pages/recipe-detail-page').then((m) => m.RecipeDetailPage) },
   { path: 'yo', title: 'Yo · FITona', loadComponent: () => import('./pages/me-page').then((m) => m.MePage) },
   { path: '**', redirectTo: 'hoy' },

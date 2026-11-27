@@ -92,5 +92,11 @@ export interface Recipe {
   perServing: Totals; total: Totals;
 }
 
+export interface TemplateSummary { key: string; title: string; servings: number; ingredients: number; ingredientNames: string[] }
+export interface TemplateDetail {
+  key: string; title: string; description: string | null; servings: number;
+  ingredients: { food: string; label: string | null; quantity: number; unit: string; note: string | null }[]; steps: string[];
+}
+
 export interface Unit { code: string; kind: string; singular: string; plural: string }
 export interface Reference { units: Unit[]; mealSlots: { code: string; name: string }[] }

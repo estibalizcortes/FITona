@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import {
   CalcResponse, Diary, DiaryEntry, Food, FoodCategory, FoodRequest, FoodResponse, ItemRequest, Recipe, RecipeRequest,
-  RecipeSummary, Reference,
+  RecipeSummary, Reference, TemplateDetail, TemplateSummary,
 } from './models';
 
 @Injectable({ providedIn: 'root' })
@@ -35,9 +35,9 @@ export class Api {
   recipes(): Promise<RecipeSummary[]> { return firstValueFrom(this.http.get<RecipeSummary[]>(`${this.base}/recipes`)); }
   recipe(id: string): Promise<Recipe> { return firstValueFrom(this.http.get<Recipe>(`${this.base}/recipes/${id}`)); }
   createRecipe(r: RecipeRequest): Promise<Recipe> { return firstValueFrom(this.http.post<Recipe>(`${this.base}/recipes`, r)); }
-  recipeTemplates(): Promise<{ key: string; title: string; servings: number; ingredients: number }[]> {
-    return firstValueFrom(this.http.get<{ key: string; title: string; servings: number; ingredients: number }[]>(`${this.base}/recipes/templates`));
-  }
+  updateRecipe(id: string, r: RecipeRequest): Promise<Recipe> { return firstValueFrom(this.http.put<Recipe>(`${this.base}/recipes/${id}`, r)); }
+  recipeTemplates(): Promise<TemplateSummary[]> { return firstValueFrom(this.http.get<TemplateSummary[]>(`${this.base}/recipes/templates`)); }
+  recipeTemplate(key: string): Promise<TemplateDetail> { return firstValueFrom(this.http.get<TemplateDetail>(`${this.base}/recipes/templates/${key}`)); }
   copyRecipeTemplate(key: string): Promise<Recipe> { return firstValueFrom(this.http.post<Recipe>(`${this.base}/recipes/templates/${key}/copy`, {})); }
   deleteRecipe(id: string): Promise<void> { return firstValueFrom(this.http.delete<void>(`${this.base}/recipes/${id}`)); }
 
