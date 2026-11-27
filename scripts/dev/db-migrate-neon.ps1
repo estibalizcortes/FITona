@@ -15,8 +15,20 @@ $ErrorActionPreference = 'Stop'
 $root = Resolve-Path (Join-Path $PSScriptRoot '..\..')
 Set-Location $root
 if (-not (Get-Command docker -ErrorAction SilentlyContinue)) { throw 'Docker no está instalado o no está en el PATH. Abra Docker Desktop.' }
-docker info *> $null
-if ($LASTEXITCODE -ne 0) { throw 'Docker Desktop no está en marcha. Ábralo y espere a que diga Engine running.' }
+# Ejecuta un programa externo SIN que su stderr se convierta en excepción: Windows PowerShell 5.1 con $ErrorActionPreference = 'Stop'
+# trata como error terminante cualquier línea de stderr redirigida (p. ej. «Unable to find image» al descargar, o un fallo esperado).
+# Devuelve el código de salida y la salida (stdout + stderr) como texto.
+function Invoke-Native([scriptblock]$Command) {
+    $prev = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        $lines = & $Command 2>&1 | ForEach-Object { "$_" }
+        $code = $LASTEXITCODE
+    } finally { $ErrorActionPreference = $prev }
+    return [pscustomobject]@{ Code = $code; Out = (($lines | Out-String).Trim()) }
+}
+$info = Invoke-Native { docker info }
+if ($info.Code -ne 0) { throw 'Docker Desktop no está en marcha. Ábralo y espere a que diga Engine running.' }
 
 $envFile = Join-Path $root '.env.neon'
 if (-not (Test-Path $envFile)) { throw 'Falta .env.neon: copie .env.neon.example a .env.neon y rellénelo con los datos de Neon.' }
@@ -49,10 +61,15 @@ $flywayImage = if ($env:FLYWAY_IMAGE) { $env:FLYWAY_IMAGE } else { 'flyway/flywa
 function Invoke-Psql([string]$user, [string]$password, [string]$sql, [switch]$AllowFailure) {
     $env:PGPASSWORD = $password
     try {
-        $out = docker run --rm -e PGPASSWORD $psqlImage psql "host=$($cfg.NEON_HOST) dbname=$($cfg.NEON_DB) user=$user sslmode=require connect_timeout=30" -v ON_ERROR_STOP=1 -At -F '|' -c $sql 2>&1
-        $code = $LASTEXITCODE
+        $res = Invoke-Native { docker run --rm -e PGPASSWORD $psqlImage psql "host=$($cfg.NEON_HOST) dbname=$($cfg.NEON_DB) user=$user sslmode=require connect_timeout=30" -v ON_ERROR_STOP=1 -At -F '|' -c $sql }
+        $code = $res.Code
+        $out = $res.Out
     } finally { Remove-Item Env:PGPASSWORD -ErrorAction SilentlyContinue }
-    if ($code -ne 0 -and -not $AllowFailure) { throw "psql falló: $out" }
+    # psql puede repetir la sentencia en sus errores (p. ej. CREATE ROLE ... PASSWORD): se enmascaran las claves antes de mostrar nada.
+    if ($code -ne 0 -and -not $AllowFailure) {
+        foreach ($s in @($cfg.NEON_OWNER_PASSWORD, $cfg.NEON_APP_PASSWORD)) { if ($s) { $out = $out.Replace($s, '********') } }
+        throw "psql falló: $out"
+    }
     return [pscustomobject]@{ Code = $code; Out = ($out -join "`n").Trim() }
 }
 $failures = 0
@@ -61,6 +78,8 @@ function Check([string]$what, [bool]$ok, [string]$detail = '') {
 }
 
 Write-Host '1/4 Conectando a Neon y creando el rol fitona_app (si la base estaba dormida tarda unos segundos)...' -ForegroundColor Cyan
+$pull = Invoke-Native { docker pull -q $psqlImage }
+if ($pull.Code -ne 0) { throw "No se pudo descargar la imagen ${psqlImage}: $($pull.Out)" }
 $state = Invoke-Psql $cfg.NEON_OWNER_USER $cfg.NEON_OWNER_PASSWORD 'SELECT current_user, version()'
 Write-Host "  Conectado: $($state.Out)"
 $roleSql = @'
@@ -78,10 +97,15 @@ $null = Invoke-Psql $cfg.NEON_OWNER_USER $cfg.NEON_OWNER_PASSWORD ($roleSql -rep
 Write-Host '  Rol fitona_app listo (sin superusuario, sin crear bases ni roles).'
 
 Write-Host '2/4 Aplicando migraciones PostgreSQL (esquema, catálogo y permisos)...' -ForegroundColor Cyan
-docker run --rm -v "$($root.Path)\database\migrations-pg:/flyway/sql:ro" $flywayImage `
+$pull = Invoke-Native { docker pull -q $flywayImage }
+if ($pull.Code -ne 0) { throw "No se pudo descargar la imagen ${flywayImage}: $($pull.Out)" }
+$env:FLYWAY_PASSWORD = $cfg.NEON_OWNER_PASSWORD   # por variable de entorno: no aparece en la línea de comandos
+docker run --rm -e FLYWAY_PASSWORD -v "$($root.Path)\database\migrations-pg:/flyway/sql:ro" $flywayImage `
     "-url=jdbc:postgresql://$($cfg.NEON_HOST)/$($cfg.NEON_DB)?sslmode=require" `
-    "-user=$($cfg.NEON_OWNER_USER)" "-password=$($cfg.NEON_OWNER_PASSWORD)" -connectRetries=10 migrate
-if ($LASTEXITCODE -ne 0) { throw "Flyway falló (código $LASTEXITCODE)" }
+    "-user=$($cfg.NEON_OWNER_USER)" -connectRetries=10 migrate
+$flywayCode = $LASTEXITCODE
+Remove-Item Env:FLYWAY_PASSWORD -ErrorAction SilentlyContinue
+if ($flywayCode -ne 0) { throw "Flyway falló (código $flywayCode)" }
 
 Write-Host '3/4 Verificando tablas, disparadores, datos y permisos...' -ForegroundColor Cyan
 $q = @'
@@ -103,16 +127,17 @@ $flags = (Invoke-Psql $cfg.NEON_OWNER_USER $cfg.NEON_OWNER_PASSWORD "SELECT rols
 Check 'rol fitona_app sin privilegios especiales (superuser, createdb, createrole, bypassrls, neon_superuser = todo f)' ($flags -eq 'f|f|f|f|f') "[$flags]"
 $app = Invoke-Psql 'fitona_app' $cfg.NEON_APP_PASSWORD 'SELECT count(*) FROM foods' -AllowFailure
 Check 'fitona_app puede leer datos' ($app.Code -eq 0 -and $app.Out -eq '576') "[$($app.Out)]"
-$ddl = Invoke-Psql 'fitona_app' $cfg.NEON_APP_PASSWORD 'CREATE TABLE zz_prueba_ddl (x int)' -AllowFailure
+# Pruebas negativas dentro de una transacción con ROLLBACK: si por error los permisos lo permitieran, no queda ningún cambio.
+$ddl = Invoke-Psql 'fitona_app' $cfg.NEON_APP_PASSWORD 'BEGIN; CREATE TABLE zz_prueba_ddl (x int); ROLLBACK;' -AllowFailure
 Check 'fitona_app NO puede crear tablas' ($ddl.Code -ne 0)
-$drop = Invoke-Psql 'fitona_app' $cfg.NEON_APP_PASSWORD 'DROP TABLE foods' -AllowFailure
+$drop = Invoke-Psql 'fitona_app' $cfg.NEON_APP_PASSWORD 'BEGIN; DROP TABLE foods; ROLLBACK;' -AllowFailure
 Check 'fitona_app NO puede borrar tablas' ($drop.Code -ne 0)
 
 if ($TestBackend) {
     Write-Host '4/4 Probando el backend contra Neon (construye la imagen de Render: tarda varios minutos la primera vez)...' -ForegroundColor Cyan
     docker build -f backend/Dockerfile.render -t fitona-backend:render .
     if ($LASTEXITCODE -ne 0) { throw 'No se pudo construir backend\Dockerfile.render' }
-    docker rm -f fitona-backend-neon *> $null
+    $null = Invoke-Native { docker rm -f fitona-backend-neon }
     $env:FITONA_DB_PASSWORD = $cfg.NEON_APP_PASSWORD
     docker run -d --name fitona-backend-neon -p 127.0.0.1:10000:10000 -e PORT=10000 -e FITONA_DB_KIND=postgresql `
         -e "FITONA_DB_URL=jdbc:postgresql://$($cfg.NEON_HOST)/$($cfg.NEON_DB)?sslmode=require" -e FITONA_DB_USER=fitona_app `
@@ -138,8 +163,8 @@ if ($TestBackend) {
             Invoke-RestMethod -Method Delete 'http://127.0.0.1:10000/api/v1/me' -Headers @{ Authorization = "Bearer $($login.token)" } | Out-Null
             Write-Host '  (la cuenta de prueba se ha borrado)'
         } catch { Check 'recorrido de prueba del backend' $false $_.Exception.Message }
-    } else { docker logs --tail 30 fitona-backend-neon }
-    docker rm -f fitona-backend-neon *> $null
+    } else { Write-Host (Invoke-Native { docker logs --tail 30 fitona-backend-neon }).Out }
+    $null = Invoke-Native { docker rm -f fitona-backend-neon }
 } else {
     Write-Host '4/4 Prueba del backend omitida (usa -TestBackend para construir y probar la imagen de Render contra Neon).' -ForegroundColor DarkGray
 }
