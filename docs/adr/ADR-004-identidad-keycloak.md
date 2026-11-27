@@ -14,3 +14,7 @@ Control y datos en la UE; coste operativo extra (memoria, actualizaciones). Alte
 
 ## Actualización (18-nov-2026)
 **Keycloak no está implementado.** El backend incluye solo una identidad de **desarrollo** (cabecera `X-Dev-User` con un UUID, activable con `FITONA_AUTH_DEV_ENABLED=true`; desactivada por defecto: sin ella toda petición a `/api` responde 401). No es seguridad real y no debe exponerse. La integración OIDC es requisito previo a cualquier uso con datos reales.
+
+## Actualización (27-nov-2026)
+Por decisión de la propietaria se implementa **autenticación propia con correo y contraseña** en el backend (PBKDF2-SHA256 600.000 iteraciones con sal, sesiones con token opaco guardado como SHA-256, límite de 5 intentos fallidos/15 min por correo en memoria, consentimiento de datos de salud y confirmación de mayoría de edad al registrarse). Esto **sustituye a Keycloak en la v1** y modifica la decisión original «la BD no guarda correo ni contraseña»: ahora `USER_CREDENTIALS` guarda el correo y el hash (se borran en cascada con la cuenta). **Faltan** recuperación de contraseña y verificación de correo (requieren envío de correo). La cabecera `X-Dev-User` queda solo para pruebas con `FITONA_AUTH_DEV_ENABLED=true`.
+

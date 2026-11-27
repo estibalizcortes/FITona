@@ -1,4 +1,5 @@
 <a class="skip" href="#main">Saltar al contenido</a>
+@if (session.token()) {
 <header class="topbar">
   <a routerLink="/hoy" class="brand" aria-label="FITona, ir a Hoy">FITona</a>
   <label class="mode">
@@ -10,11 +11,13 @@
     </select>
   </label>
 </header>
+}
 
 <main id="main" class="page">
   <router-outlet />
 </main>
 
+@if (session.token()) {
 <nav class="tabbar" aria-label="Navegación principal">
   <a routerLink="/hoy" routerLinkActive="active"><span aria-hidden="true">🍽</span>Hoy</a>
   <a routerLink="/alimentos" routerLinkActive="active"><span aria-hidden="true">🥕</span>Alimentos</a>
@@ -22,3 +25,4 @@
   <a routerLink="/recetas" routerLinkActive="active"><span aria-hidden="true">📖</span>Recetas</a>
   <a routerLink="/yo" routerLinkActive="active"><span aria-hidden="true">👤</span>Yo</a>
 </nav>
+}

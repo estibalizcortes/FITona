@@ -128,3 +128,6 @@ summary { cursor: pointer; font-weight: 600; min-height: var(--tap); display: fl
 .tabs { display: flex; gap: .5rem; margin: .5rem 0 1rem; }
 .tabs button { flex: 1; min-height: 2.75rem; border: 1px solid var(--border); background: transparent; color: inherit; border-radius: .6rem; font: inherit; cursor: pointer; }
 .tabs button[aria-selected='true'] { border-color: var(--accent); font-weight: 600; }
+
+.check { display: flex; gap: .6rem; align-items: flex-start; margin: .75rem 0; line-height: 1.4; }
+.check input { margin-top: .25rem; width: 1.25rem; height: 1.25rem; flex: none; }

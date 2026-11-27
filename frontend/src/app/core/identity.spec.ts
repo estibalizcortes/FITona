@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { devUserId, newUuid } from './identity';
+import { newUuid } from './identity';
 
 const V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 
@@ -20,13 +20,5 @@ describe('identity', () => {
     } finally {
       vi.unstubAllGlobals();
     }
-  });
-
-  it('sin almacenamiento usa un id aleatorio de sesión, nunca un id fijo compartido', () => {
-    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => { throw new Error('bloqueado'); });
-    const id = devUserId();
-    expect(id).toMatch(V4);
-    expect(id).not.toBe('00000000-0000-4000-8000-000000000000');
-    expect(devUserId()).toBe(id);
   });
 });

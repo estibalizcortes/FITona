@@ -40,7 +40,7 @@
 
 ## Limitaciones reales (no esconderlas)
 
-- **Sin autenticación real.** Solo hay una identidad de *desarrollo* (UUID en el navegador enviado en `X-Dev-User`). Cualquiera que conozca ese UUID ve esos datos. Keycloak/OIDC **no está implementado** (ADR-004). No usar con datos reales ni exponer a Internet.
+- **Autenticación propia con correo y contraseña** (ver sección «Cuentas e inicio de sesión»); Keycloak/OIDC no se implementa en la v1. Sin recuperación de contraseña ni verificación de correo todavía. La identidad `X-Dev-User` solo existe con `FITONA_AUTH_DEV_ENABLED=true` (pruebas): no activarla en un servidor público.
 - **El catálogo de arranque (46 alimentos) NO está verificado** (ver arriba). Faltan muchos alimentos y el importador con procedencia y licencia (BEDCA/USDA/CIQUAL). Desde este entorno la API de USDA no era accesible.
 - **Solo valores por 100 g** (los líquidos usan densidad); no hay «por 100 ml».
 - **Búsqueda difusa/sinónimos**: solo búsqueda por contiene, sin tolerancia a erratas ni sinónimos (batata/boniato) todavía; la tabla de nombres ya los admite.
@@ -86,4 +86,9 @@ Corregidos y con prueba: cantidades absurdas (antes 500 al guardar → ahora 400
 - **Medidas caseras** (V013): unidad pequeña/grande, chorrito, pizca, diente, onza y cucharadas de semillas. Los gramos son **aproximados** (se marcan como cantidad aproximada) y solo existen para los alimentos listados en `V013`; en el resto se usan gramos.
 - Los tiempos/temperaturas de los pasos (p. ej. freidora de aire a unos 195 °C durante 10-12 min, yogur 24-48 h) son **los que indicó la propietaria**, marcados como orientativos; no proceden de una fuente verificada.
 - **Pendiente:** sustituir un ingrediente directamente en el editor (hoy: quitar y añadir otro), vista de calorías en la ficha de la receta típica antes de copiarla, más recetas y fotos.
+
+## Cuentas e inicio de sesión (27-nov-2026)
+- **Implementado y probado** (backend 45/45, E2E 25/25): registro e inicio de sesión con correo y contraseña, sesiones de 90 días, cierre de sesión, borrar cuenta (elimina credenciales), aislamiento entre cuentas, límite de intentos, consentimiento de datos de salud y mayoría de edad. El frontend pide entrar antes de mostrar nada.
+- **No hecho:** recuperar contraseña, verificar correo, «Entrar con Google» (se interpretó «Gmail y contraseña» como correo + contraseña; sirve cualquier correo, también Gmail), copias de seguridad, revisión legal. La política de privacidad de la app es un **borrador**.
+- **Publicación:** guía en `docs/publicar.md` (servidor con HTTPS vía `docker-compose.prod.yml` + Caddy; PWABuilder para Android; PWA en iPhone). **No ejecutado**: sin servidor, dominio ni cuentas desde aquí.
 

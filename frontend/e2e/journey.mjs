@@ -23,6 +23,18 @@ page.on('pageerror', (e) => consoleErrors.push(String(e)));
 
 try {
   await page.goto(BASE);
+  await page.waitForSelector('h1:has-text("Entrar")');
+  check('sin sesión se pide entrar (no se ve nada de la app)', (await page.locator('nav.tabbar').count()) === 0);
+  const mail = `e2e${Date.now()}@example.com`;
+  await page.getByRole('button', { name: 'Crear una cuenta' }).click();
+  await page.getByLabel('Correo electrónico').fill(mail);
+  await page.getByLabel('Contraseña').fill('una-frase-larga-segura');
+  await page.getByRole('button', { name: 'Crear cuenta' }).click();
+  await page.waitForSelector('.error');
+  check('crear cuenta exige ser adulta y consentir (sin marcar no entra)', true);
+  await page.getByLabel('Soy mayor de edad').check();
+  await page.getByLabel(/Acepto que FITona guarde/).check();
+  await page.getByRole('button', { name: 'Crear cuenta' }).click();
   await page.waitForSelector('text=Aún no hay nada registrado');
   check('abre en «Hoy» con el día vacío', true);
 
@@ -171,7 +183,20 @@ try {
   const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: /Descargar mis datos/ }).click()]);
   check('se pueden descargar los datos propios (JSON)', download.suggestedFilename() === 'fitona-mis-datos.json');
 
-  check('sin errores en la consola del navegador', consoleErrors.length === 0, consoleErrors.join(' | ').slice(0, 200));
+  // 7) Cerrar sesión y volver a entrar con el mismo correo: los datos siguen ahí
+  await page.getByRole('button', { name: 'Cerrar sesión' }).click();
+  await page.waitForSelector('h1:has-text("Entrar")');
+  await page.getByLabel('Correo electrónico').fill(mail);
+  await page.getByLabel('Contraseña').fill('mala-contraseña-larga');
+  await page.getByRole('button', { name: 'Entrar', exact: true }).click();
+  await page.waitForSelector('text=Correo o contraseña incorrectos');
+  await page.getByLabel('Contraseña').fill('una-frase-larga-segura');
+  await page.getByRole('button', { name: 'Entrar', exact: true }).click();
+  await page.waitForSelector('h2:has-text("Total del día")');
+  check('contraseña mala rechazada; al entrar bien los datos de la cuenta siguen ahí', true);
+
+  const realErrors = consoleErrors.filter((m) => !/status of (400|401)/.test(m));
+  check('sin errores en la consola del navegador', realErrors.length === 0, realErrors.join(' | ').slice(0, 200));
 } catch (e) {
   check('el recorrido se completa sin excepciones', false, String(e).split('\n')[0]);
   await page.screenshot({ path: `${SHOTS}/error.png` }).catch(() => {});

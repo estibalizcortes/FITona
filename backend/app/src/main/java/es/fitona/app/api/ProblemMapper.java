@@ -25,6 +25,11 @@ public class ProblemMapper {
     }
 
     @ServerExceptionMapper
+    public Response auth(es.fitona.app.security.AuthService.AuthException e) {
+        return problem(e.status, e.status == 429 ? "Demasiados intentos" : "No se pudo completar", e.getMessage());
+    }
+
+    @ServerExceptionMapper
     public Response badRequest(IllegalArgumentException e) {
         return problem(400, "Datos no válidos", e.getMessage());
     }

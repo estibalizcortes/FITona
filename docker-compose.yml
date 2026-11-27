@@ -56,8 +56,8 @@ services:
       FITONA_DB_URL: jdbc:oracle:thin:@//oracle:1521/FREEPDB1
       FITONA_DB_USER: FITONA_APP
       FITONA_DB_PASSWORD: ${FITONA_APP_PASSWORD}
-      # SOLO DESARROLLO: autenticación por cabecera X-Dev-User (no es seguridad real). Ver ADR-004.
-      FITONA_AUTH_DEV_ENABLED: "true"
+      # Solo para pruebas internas: acepta la cabecera X-Dev-User sin contraseña. Dejar en false.
+      FITONA_AUTH_DEV_ENABLED: ${FITONA_AUTH_DEV_ENABLED:-false}
     ports:
       - "127.0.0.1:${BACKEND_PORT:-8080}:8080"
     restart: unless-stopped

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Api, errorMessage } from '../core/api';
-import { devUserId } from '../core/identity';
+import { Router } from '@angular/router';
+import { Session } from '../core/session';
 
 @Component({
   selector: 'app-me-page',
@@ -27,10 +28,14 @@ import { devUserId } from '../core/identity';
       </article>
 
       <article class="card">
+        <h2>Tu cuenta</h2>
+        <p>Has entrado como <strong>{{ session.email() }}</strong>.</p>
+        <div class="actions"><button type="button" class="btn" (click)="signOut()">Cerrar sesión</button></div>
+      </article>
+
+      <article class="card">
         <h2>Estado de esta versión</h2>
-        <p class="warn">Esta es una versión de <strong>desarrollo</strong>: no hay cuenta con correo ni contraseña todavía.
-          Tu identificador en este navegador es <code>{{ id }}</code>; quien lo conozca podría ver tus datos y,
-          si borras los datos del navegador, pierdes el acceso. No introduzcas datos que no quieras perder.</p>
+        <p class="warn">Versión de pruebas. No se puede recuperar la contraseña si se olvida (aún no se envían correos): descarga tus datos de vez en cuando.</p>
         <p class="muted">Aún no existen: plan semanal, despensa, lista de la compra, asistente de IA ni actividad física.</p>
       </article>
     </section>
@@ -38,7 +43,8 @@ import { devUserId } from '../core/identity';
 })
 export class MePage {
   private readonly api = inject(Api);
-  protected readonly id = devUserId();
+  protected readonly session = inject(Session);
+  private readonly router = inject(Router);
   protected readonly message = signal('');
   protected readonly error = signal('');
 
@@ -54,9 +60,15 @@ export class MePage {
     } catch (e) { this.error.set(errorMessage(e)); }
   }
 
+  protected async signOut(): Promise<void> {
+    try { await this.api.logout(); } catch { /* aunque falle la red, se cierra en este dispositivo */ }
+    this.session.close();
+    await this.router.navigate(['/entrar']);
+  }
+
   protected async deleteAll(): Promise<void> {
     if (!confirm('Se borrarán TODOS tus alimentos, recetas y registros. No se puede deshacer. ¿Continuar?')) return;
     this.error.set(''); this.message.set('');
-    try { await this.api.deleteAccount(); this.message.set('Tus datos se han borrado.'); } catch (e) { this.error.set(errorMessage(e)); }
+    try { await this.api.deleteAccount(); this.session.close(); await this.router.navigate(['/entrar']); } catch (e) { this.error.set(errorMessage(e)); }
   }
 }

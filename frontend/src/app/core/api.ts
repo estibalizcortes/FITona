@@ -41,6 +41,14 @@ export class Api {
   copyRecipeTemplate(key: string): Promise<Recipe> { return firstValueFrom(this.http.post<Recipe>(`${this.base}/recipes/templates/${key}/copy`, {})); }
   deleteRecipe(id: string): Promise<void> { return firstValueFrom(this.http.delete<void>(`${this.base}/recipes/${id}`)); }
 
+  register(b: { email: string; password: string; adult: boolean; healthConsent: boolean }): Promise<{ token: string; email: string }> {
+    return firstValueFrom(this.http.post<{ token: string; email: string }>(`${this.base}/auth/register`, b));
+  }
+  login(email: string, password: string): Promise<{ token: string; email: string }> {
+    return firstValueFrom(this.http.post<{ token: string; email: string }>(`${this.base}/auth/login`, { email, password }));
+  }
+  logout(): Promise<void> { return firstValueFrom(this.http.post<void>(`${this.base}/auth/logout`, {})); }
+
   exportData(): Promise<unknown> { return firstValueFrom(this.http.get<unknown>(`${this.base}/me/export`)); }
   deleteAccount(): Promise<void> { return firstValueFrom(this.http.delete<void>(`${this.base}/me`)); }
 }
@@ -50,6 +58,6 @@ export function errorMessage(e: unknown): string {
   const err = e as { error?: { detail?: string; title?: string }; status?: number };
   if (err?.error?.detail) return err.error.detail;
   if (err?.status === 0) return 'No se puede conectar con el servidor.';
-  if (err?.status === 401) return 'No autenticado (¿está activado el modo de desarrollo del backend?).';
+  if (err?.status === 401) return 'Tu sesión ha caducado. Vuelve a iniciar sesión.';
   return 'Ha ocurrido un error inesperado.';
 }

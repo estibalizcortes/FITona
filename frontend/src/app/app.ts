@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { Mode } from './core/models';
 import { Prefs } from './core/prefs';
+import { Session } from './core/session';
 
 @Component({
   selector: 'app-root',
@@ -12,6 +13,7 @@ import { Prefs } from './core/prefs';
 })
 export class App {
   protected readonly prefs = inject(Prefs);
+  protected readonly session = inject(Session);
   protected readonly modes: { value: Mode; label: string }[] = [
     { value: 'SIMPLE', label: 'Sencillo' },
     { value: 'BALANCED', label: 'Equilibrado' },

@@ -1,0 +1,5 @@
+# HTTPS automático (Let's Encrypt) para tu dominio. FITONA_DOMAIN viene del .env (p. ej. app.midominio.es).
+{$FITONA_DOMAIN} {
+	encode gzip
+	reverse_proxy frontend:80
+}

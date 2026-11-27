@@ -1,0 +1,21 @@
+# Producción (servidor propio): añade HTTPS delante. Uso (en el servidor):
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+# Requisitos: dominio apuntando a la IP del servidor, puertos 80 y 443 abiertos, FITONA_DOMAIN en .env.
+# La BD y la API siguen sin publicarse a Internet; solo Caddy escucha fuera. NO activar FITONA_AUTH_DEV_ENABLED.
+services:
+  caddy:
+    image: ${CADDY_IMAGE:-caddy:2}
+    depends_on:
+      - frontend
+    environment:
+      FITONA_DOMAIN: ${FITONA_DOMAIN:?Define FITONA_DOMAIN en .env}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+    restart: unless-stopped
+
+volumes:
+  caddy-data:

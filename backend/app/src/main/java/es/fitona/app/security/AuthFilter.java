@@ -13,13 +13,13 @@ import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.server.ServerRequestFilter;
 
 /**
- * AUTENTICACIÓN DE DESARROLLO. No es seguridad real: cualquiera que conozca un UUID puede actuar como esa persona.
- * Solo se activa con fitona.auth.dev-enabled=true. La autenticación real (OIDC/Keycloak) está pendiente (ADR-004).
- * Sirve para demostrar y probar el aislamiento por persona: cada UUID ve únicamente sus datos.
+ * Autenticación de las peticiones a /api: token «Authorization: Bearer» de una sesión abierta con correo y contraseña
+ * (/api/v1/auth/login). Solo con fitona.auth.dev-enabled=true se acepta además la cabecera X-Dev-User (UUID), que NO es
+ * seguridad real y no debe activarse en un servidor público.
  */
-public class DevAuthFilter {
+public class AuthFilter {
 
-    private static final Logger LOG = Logger.getLogger(DevAuthFilter.class);
+    private static final Logger LOG = Logger.getLogger(AuthFilter.class);
 
     @ConfigProperty(name = "fitona.auth.dev-enabled", defaultValue = "false")
     boolean devEnabled;
@@ -30,17 +30,31 @@ public class DevAuthFilter {
     @Inject
     Db db;
 
+    @Inject
+    AuthService auth;
+
+    static String bearer(String header) {
+        return header != null && header.regionMatches(true, 0, "Bearer ", 0, 7) ? header.substring(7).trim() : null;
+    }
+
     @ServerRequestFilter
     public Response filter(ContainerRequestContext ctx) {
-        if (!devEnabled) {
-            return problem(401, "Autenticación no disponible", "La autenticación real aún no está implementada.");
+        String path = ctx.getUriInfo().getPath();
+        if (path.endsWith("/api/v1/auth/register") || path.endsWith("/api/v1/auth/login")) return null;
+        String token = bearer(ctx.getHeaderString("Authorization"));
+        if (token != null) {
+            UUID id = auth.userForToken(token);
+            if (id == null) return problem(401, "Sesión caducada", "Vuelve a iniciar sesión.");
+            currentUser.set(id);
+            return null;
         }
+        if (!devEnabled) return problem(401, "No autenticado", "Inicia sesión para continuar.");
         String header = ctx.getHeaderString("X-Dev-User");
         UUID id;
         try {
             id = UUID.fromString(header == null ? "" : header.trim());
         } catch (IllegalArgumentException e) {
-            return problem(401, "No autenticado", "Falta la cabecera X-Dev-User con un UUID válido.");
+            return problem(401, "No autenticado", "Falta la sesión (o la cabecera X-Dev-User en modo desarrollo).");
         }
         ensureUser(id);
         currentUser.set(id);
