@@ -11,13 +11,20 @@
 | Apple Developer Program (solo si quieres App Store) | tú | 99 $/año |
 | Revisión legal de la política de privacidad (datos de salud) | tú / asesoría | — |
 
-## 1. Servidor con HTTPS (imprescindible para móvil y tiendas)
-1. Contrata un VPS (Ubuntu 24.04), apunta tu dominio a su IP (registro A).
-2. En el servidor: `sudo apt install docker.io docker-compose-v2 git`, clona el repositorio, rama `claude-v1`.
-3. Copia `.env.example` a `.env` y pon **contraseñas largas y distintas** y `FITONA_DOMAIN=app.tudominio.es`. Deja `FITONA_AUTH_DEV_ENABLED` sin definir (= false).
-4. `docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build`
-5. Abre `https://app.tudominio.es`: debe salir «Entrar». Crea tu cuenta.
-6. **Copias de seguridad** (aún no automatizadas): haz `docker exec fitona-oracle ...` / copia del volumen `oracle-data` antes de nada importante.
+## 1. Camino fácil: servidor siempre encendido con HTTPS (sin tu ordenador)
+1. **Contrata un VPS** Ubuntu 24.04 con **4 GB de RAM** en la UE (p. ej. Hetzner Cloud, plan de unos 4-6 €/mes) y apunta su IP.
+2. **Dominio gratis** (si no quieres comprar uno): en duckdns.org crea un subdominio (p. ej. `fitona-ana.duckdns.org`) y ponle la IP del VPS.
+3. **Token de lectura de GitHub** (el repositorio es privado): GitHub → Settings → Developer settings → Fine-grained tokens → solo el repositorio FITona, permiso *Contents: Read-only*. Cópialo.
+4. En el VPS (por SSH, como root):
+   ```bash
+   git clone -b claude-v1 https://TU_USUARIO:TU_TOKEN@github.com/estibalizcortes/FITona.git /opt/fitona
+   cd /opt/fitona
+   bash deploy/setup-server.sh fitona-ana.duckdns.org
+   ```
+   Tarda unos 10-15 minutos (compila y descarga Oracle). Crea las contraseñas solo y arranca todo.
+5. Abre `https://fitona-ana.duckdns.org` en el móvil/PC: debe salir «Entrar». Crea tu cuenta.
+6. **Actualizar** tras nuevos cambios: `cd /opt/fitona && git pull && docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build`.
+7. **Copias de seguridad**: aún no automatizadas (ver §5). No guardes aquí nada que no puedas perder.
 
 ## 2. iPhone sin App Store (gratis, hoy)
 Abre `https://app.tudominio.es` en Safari → Compartir → **Añadir a pantalla de inicio**. Funciona como app (sin barra del navegador). Limitación: sin modo sin conexión todavía.
