@@ -320,7 +320,7 @@ class ApiJourneyTest {
         // sin icono propio, hereda el de su categoría
         as(me).get("/api/v1/foods?q=fuet").then().body("[0].icon", equalTo("🥓")).body("[0].categoryName", equalTo("Embutidos y fiambres"));
         // sin datos: se puede ver, pero no calcular ni usar en recetas (no se inventan cifras)
-        Response avocado = as(me).get("/api/v1/foods?q=aguacate");
+        Response avocado = as(me).get("/api/v1/foods?q=edulcorante");
         avocado.then().body("[0].hasNutrients", equalTo(false)).body("[0].quality", equalTo("NONE"))
                 .body("[0].per100.energyKcal", org.hamcrest.Matchers.nullValue());
         long av = avocado.jsonPath().getLong("[0].variantId");
@@ -336,17 +336,19 @@ class ApiJourneyTest {
     void aPersonCanSetOwnValuesForACatalogFoodAndGoBackToTheCatalogOne() {
         UUID me = UUID.randomUUID();
         UUID other = UUID.randomUUID();
-        Response avocado = as(me).get("/api/v1/foods?q=aguacate");
+        Response avocado = as(me).get("/api/v1/foods?q=edulcorante");
         long av = avocado.jsonPath().getLong("[0].variantId");
-        Response mine = as(me).body("{\"name\":\"Aguacate\",\"basedOnVariantId\":" + av
+        String icon = avocado.jsonPath().getString("[0].icon");
+        String category = avocado.jsonPath().getString("[0].categoryCode");
+        Response mine = as(me).body("{\"name\":\"Edulcorante\",\"basedOnVariantId\":" + av
                 + ",\"per100\":{\"energyKcal\":160,\"proteinG\":2,\"carbsG\":1.8,\"fatG\":14.7}}").post("/api/v1/foods");
         mine.then().statusCode(201).body("food.overridesCatalog", equalTo(true)).body("food.editable", equalTo(true))
-                .body("food.icon", equalTo("🥑")).body("food.categoryCode", equalTo("FRUTAS")).body("food.quality", equalTo("CUSTOM"));
+                .body("food.icon", equalTo(icon)).body("food.categoryCode", equalTo(category)).body("food.quality", equalTo("CUSTOM"));
         long mineId = mine.jsonPath().getLong("food.variantId");
         // para mí el de catálogo desaparece del buscador y aparece el mío (con datos); para otra persona sigue el del catálogo
-        as(me).get("/api/v1/foods?q=aguacate").then().body("$", hasSize(1)).body("[0].variantId", equalTo((int) mineId))
+        as(me).get("/api/v1/foods?q=edulcorante").then().body("$", hasSize(1)).body("[0].variantId", equalTo((int) mineId))
                 .body("[0].hasNutrients", equalTo(true));
-        as(other).get("/api/v1/foods?q=aguacate").then().body("$", hasSize(1)).body("[0].variantId", equalTo((int) av))
+        as(other).get("/api/v1/foods?q=edulcorante").then().body("$", hasSize(1)).body("[0].variantId", equalTo((int) av))
                 .body("[0].hasNutrients", equalTo(false));
         as(me).body("{\"items\":[{\"variantId\":" + mineId + ",\"quantity\":100,\"unitCode\":\"G\"}]}").post("/api/v1/calc")
                 .then().statusCode(200).body("total.nutrients.energyKcal.value", equalTo(160));
@@ -355,6 +357,6 @@ class ApiJourneyTest {
         as(me).body("{\"name\":\"x\",\"per100\":{\"proteinG\":1}}").put("/api/v1/foods/" + av).then().statusCode(404);
         // volver al valor del catálogo = borrar lo mío
         as(me).delete("/api/v1/foods/" + mineId).then().statusCode(204);
-        as(me).get("/api/v1/foods?q=aguacate").then().body("[0].variantId", equalTo((int) av));
+        as(me).get("/api/v1/foods?q=edulcorante").then().body("[0].variantId", equalTo((int) av));
     }
 }

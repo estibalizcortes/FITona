@@ -119,10 +119,13 @@ try {
   const tiles = await page.locator('.tile').count();
   check('la pantalla de alimentos muestra las categorías (34 con «Mis alimentos»)', tiles === 34, `${tiles} categorías`);
   await page.getByRole('button', { name: /Frutas/ }).click();
-  await page.waitForSelector('text=Aguacate');
+  await page.waitForSelector('text=Mango');
   const icons = await page.locator('.result .icon').allInnerTexts();
   check('cada alimento de la categoría lleva su imagen (31 frutas)', icons.length === 31 && icons.every((i) => i.trim().length > 0) && icons.includes('🥑'), `${icons.length} alimentos`);
-  await page.getByRole('link', { name: /Aguacate/ }).click();
+  await page.getByRole('button', { name: /Categorías/ }).click();
+  await page.getByLabel('Buscar').fill('edulcorante');
+  await page.waitForSelector('text=Sin datos nutricionales');
+  await page.getByRole('link', { name: /Edulcorante/ }).click();
   await page.waitForSelector('text=Poner mis valores');
   check('un alimento sin datos lo dice y no inventa cifras', /aún no tiene datos nutricionales/.test(await page.locator('main').innerText()));
   await page.getByRole('link', { name: 'Poner mis valores' }).click();
@@ -131,10 +134,10 @@ try {
   await page.getByRole('button', { name: 'Guardar alimento' }).click();
   await page.waitForSelector('text=Alimento guardado');
   await page.locator('nav.tabbar a', { hasText: 'Alimentos' }).click();
-  await page.getByLabel('Buscar').fill('aguacate');
+  await page.getByLabel('Buscar').fill('edulcorante');
   await page.waitForSelector('text=tus valores');
   const av = await page.locator('main').innerText();
-  check('tus valores sustituyen al alimento del catálogo (solo uno «Aguacate», con datos)', (av.match(/Aguacate/g) ?? []).length === 1 && /160 kcal/.test(av) && !/Sin datos nutricionales/.test(av), av.replace(/\s+/g, ' ').slice(0, 120));
+  check('tus valores sustituyen al alimento del catálogo (solo uno «Edulcorante», con datos)', (av.match(/Edulcorante/g) ?? []).length === 1 && /160 kcal/.test(av) && !/Sin datos nutricionales/.test(av), av.replace(/\s+/g, ' ').slice(0, 120));
   await page.screenshot({ path: `${SHOTS}/5-categorias.png` });
 
   // 6) Datos del usuario
