@@ -12,7 +12,6 @@ import { Session } from '../core/session';
       <h1>{{ creating() ? 'Crear cuenta' : 'Entrar' }}</h1>
       <p class="muted">Tu cuenta guarda tus alimentos, recetas y registros para que no los pierdas si cambias de móvil.</p>
       @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
-      @if (slow()) { <p class="warn" role="status">El servidor se está despertando (el alojamiento gratuito se duerme si no se usa). Puede tardar hasta un minuto; no cierres la pantalla.</p> }
       <form (submit)="submit($event)">
         <label class="field">
           <span>Correo electrónico</span>
@@ -52,19 +51,17 @@ export class LoginPage {
   protected readonly adult = signal(false);
   protected readonly consent = signal(false);
   protected readonly busy = signal(false);
-  protected readonly slow = signal(false);
   protected readonly error = signal('');
 
   protected async submit(ev: Event): Promise<void> {
     ev.preventDefault();
     this.busy.set(true); this.error.set('');
-    const timer = setTimeout(() => this.slow.set(true), 5000);
     try {
       const s = this.creating()
         ? await this.api.register({ email: this.email(), password: this.password(), adult: this.adult(), healthConsent: this.consent() })
         : await this.api.login(this.email(), this.password());
       this.session.open(s.token, s.email);
       await this.router.navigate(['/hoy']);
-    } catch (e) { this.error.set(errorMessage(e)); } finally { clearTimeout(timer); this.slow.set(false); this.busy.set(false); }
+    } catch (e) { this.error.set(errorMessage(e)); } finally { this.busy.set(false); }
   }
 }

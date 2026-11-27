@@ -57,7 +57,16 @@ export class Api {
 export function errorMessage(e: unknown): string {
   const err = e as { error?: { detail?: string; title?: string }; status?: number };
   if (err?.error?.detail) return err.error.detail;
-  if (err?.status === 0) return 'No se puede conectar con el servidor.';
-  if (err?.status === 401) return 'Tu sesión ha caducado. Vuelve a iniciar sesión.';
+  const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
+  const status = err?.status ?? -1;
+  // Sin red: el navegador da 0; con el service worker activo da un 504 vacío. Con el servidor gratuito dormido: 502/503/504.
+  if (offline && (status === 0 || status === 502 || status === 503 || status === 504)) {
+    return 'Sin conexión a Internet. Revisa tu red y vuelve a intentarlo: no se ha guardado nada.';
+  }
+  if (status === 0) return 'No se puede conectar con el servidor. Si acaba de estar parado, puede estar despertando: espera un minuto y reintenta.';
+  if (status === 502 || status === 503 || status === 504) {
+    return 'El servidor no responde ahora mismo (el alojamiento gratuito puede estar despertando). Espera un minuto y vuelve a intentarlo.';
+  }
+  if (status === 401) return 'Tu sesión ha caducado. Vuelve a iniciar sesión.';
   return 'Ha ocurrido un error inesperado.';
 }

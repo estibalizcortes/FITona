@@ -59,9 +59,9 @@ Tamaño: ~14 MB (límite gratuito 0,5 GB). Neon se «duerme» tras unos minutos 
 | **Build Command** | `npm ci && npm run build && echo "window.FITONA_CONFIG = { apiBase: '$FITONA_API_URL' };" > dist/frontend/browser/config.js` |
 | **Publish Directory** | `dist/frontend/browser` |
 | Variable `FITONA_API_URL` | `https://TU-BACKEND.onrender.com` (sin `/` final) |
-| Variable `NODE_VERSION` | `22.12.0` |
+| Variable `NODE_VERSION` | `24.15.0` |
 | Redirects/Rewrites | **Rewrite** `/*` → `/index.html` (la app es de una sola página) |
-| Headers | `/config.js` → `Cache-Control: no-cache` |
+| Headers | Ver `render.yaml` (sección `headers`): CSP y cabeceras de seguridad en `/*`, y `Cache-Control: no-cache` en `/ngsw-worker.js`, `/safety-worker.js`, `/ngsw.json`, `/config.js`, `/index.html` y `/manifest.webmanifest` (imprescindible para que las actualizaciones de la PWA lleguen). Detalle en `docs/pwa.md` |
 
 El `config.js` generado en el build le dice al navegador dónde está la API; el código no lleva ninguna URL fija. (`render.yaml` en la raíz contiene lo mismo como Blueprint, opcional y **no probado**.)
 

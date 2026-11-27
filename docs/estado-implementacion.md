@@ -97,3 +97,7 @@ Corregidos y con prueba: cantidades absurdas (antes 500 al guardar → ahora 400
 - **Configuración para Render** (`backend/Dockerfile.render`, `render.yaml`, `frontend/public/config.js`, variables en `docs/despliegue-render-neon.md`). Memoria medida bajo 512 MB y 0,1 CPU: bien; el hash de contraseñas hubo que abaratar (`FITONA_PBKDF2_ITERATIONS`).
 - **No probado:** despliegue real en Render/Neon; build de `Dockerfile.render` dentro de Render. **Coste de mantenimiento:** cada migración Oracle nueva exige regenerar y probar la de PostgreSQL.
 
+## PWA para iPhone y Android (27-nov-2026)
+- **Implementado y probado en Chromium** (E2E de la PWA 31/31: manifiesto, instalabilidad, CSP, service worker, sin conexión, servidor despertando, actualización y auditoría de cachés; unitarias 19/19; backend 48/48 en Oracle y PostgreSQL; E2E de siempre 25/25). Detalle y limitaciones en `docs/pwa.md`.
+- **No probado en iPhone/Android reales.** Hay que comprobarlo en tu móvil tras el despliegue (instalar, abrir a pantalla completa, probar sin conexión y una actualización).
+

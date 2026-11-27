@@ -1,4 +1,5 @@
 <a class="skip" href="#main">Saltar al contenido</a>
+<div class="chrome">
 @if (session.token()) {
 <header class="topbar">
   <a routerLink="/hoy" class="brand" aria-label="FITona, ir a Hoy">FITona</a>
@@ -12,6 +13,15 @@
   </label>
 </header>
 }
+@if (status.notice() === 'offline') {
+  <p class="notice err" role="alert">Sin conexión a Internet. Puedes seguir viendo lo que ya está en pantalla, pero no se puede guardar ni consultar hasta que vuelva la conexión.</p>
+} @else if (status.notice() === 'waking') {
+  <p class="notice info" role="status">El servidor gratuito se está despertando… puede tardar hasta un minuto. No cierres la app.</p>
+}
+@if (updates.ready()) {
+  <p class="notice ok" role="status"><span>Hay una versión nueva de FITona.</span><button type="button" (click)="updates.apply()">Actualizar</button></p>
+}
+</div>
 
 <main id="main" class="page">
   <router-outlet />

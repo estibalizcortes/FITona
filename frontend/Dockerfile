@@ -12,5 +12,6 @@ RUN npx ng build
 
 FROM ${NGINX_IMAGE} AS runtime
 COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
+COPY frontend/nginx-security-headers.inc /etc/nginx/security-headers.inc
 COPY --from=build /app/dist/frontend/browser /usr/share/nginx/html
 EXPOSE 80

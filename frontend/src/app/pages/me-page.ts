@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Api, errorMessage } from '../core/api';
 import { Router } from '@angular/router';
+import { Install } from '../core/install';
 import { Session } from '../core/session';
 
 @Component({
@@ -28,6 +29,20 @@ import { Session } from '../core/session';
       </article>
 
       <article class="card">
+        <h2>Instalar FITona en tu móvil</h2>
+        @if (install.standalone()) {
+          <p class="ok" role="status">Ya estás usando FITona como app.</p>
+        } @else if (install.canPrompt()) {
+          <p class="muted">Se abre a pantalla completa, con su icono, como cualquier otra app.</p>
+          <div class="actions"><button type="button" class="btn primary" (click)="install.prompt()">Instalar FITona</button></div>
+        } @else if (install.ios) {
+          <p>En el iPhone: abre esta página en <strong>Safari</strong>, pulsa <strong>Compartir</strong> (el cuadrado con la flecha) y elige <strong>Añadir a pantalla de inicio</strong>.</p>
+        } @else {
+          <p class="muted">En Android: menú de Chrome (⋮) → <strong>Instalar aplicación</strong> o <strong>Añadir a pantalla de inicio</strong>.</p>
+        }
+      </article>
+
+      <article class="card">
         <h2>Tu cuenta</h2>
         <p>Has entrado como <strong>{{ session.email() }}</strong>.</p>
         <div class="actions"><button type="button" class="btn" (click)="signOut()">Cerrar sesión</button></div>
@@ -44,6 +59,7 @@ import { Session } from '../core/session';
 export class MePage {
   private readonly api = inject(Api);
   protected readonly session = inject(Session);
+  protected readonly install = inject(Install);
   private readonly router = inject(Router);
   protected readonly message = signal('');
   protected readonly error = signal('');

@@ -108,4 +108,14 @@ class AuthTest {
         Assertions.assertTrue(PasswordHasher.verify("clave-muy-larga-1", after));
         Assertions.assertTrue(PasswordHasher.MIN_ITERATIONS >= 100_000, "el suelo de iteraciones no debe bajar de 100000");
     }
+
+    @Test
+    void apiResponsesAreNeverCacheable() {
+        String mail = "nostore" + UUID.randomUUID() + "@example.com";
+        // la respuesta que lleva el token de sesión y una de datos privados llevan «no-store»; también los errores
+        String token = post("/api/v1/auth/register", reg(mail, "clave-muy-larga-1", true, true)).then().statusCode(201)
+                .header("Cache-Control", equalTo("no-store")).extract().path("token");
+        given().header("Authorization", "Bearer " + token).get("/api/v1/foods?q=manzana").then().statusCode(200).header("Cache-Control", equalTo("no-store"));
+        given().get("/api/v1/foods?q=manzana").then().statusCode(401).header("Cache-Control", equalTo("no-store"));
+    }
 }
