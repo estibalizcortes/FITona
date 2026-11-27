@@ -23,8 +23,7 @@ import { Prefs } from '../core/prefs';
       @if (loaded() && foods().length === 0) {
         <div class="empty">
           <p>@if (query()) { Ningún alimento coincide con «{{ query() }}». } @else { Todavía no hay alimentos. }</p>
-          <p class="muted">El catálogo compartido aún no tiene datos cargados: de momento, los alimentos son los que
-            crees tú, con los valores de la etiqueta o de la fuente que prefieras. Se marcan como «dato personalizado».</p>
+          <p class="muted">Puedes crear tu propio alimento con los valores de la etiqueta; se marca como «dato personalizado».</p>
         </div>
       }
       <ul class="results">
@@ -35,6 +34,7 @@ import { Prefs } from '../core/prefs';
               <span class="muted small">
                 @if (prefs.mode() !== 'SIMPLE') { {{ kcal(f) }} por 100 g · }
                 <span aria-hidden="true">{{ rel(f).symbol }}</span> {{ rel(f).label }}
+                @if (!f.editable) { · {{ f.source }} }
               </span>
             </a>
           </li>

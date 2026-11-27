@@ -55,7 +55,7 @@ public class AccountResource {
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("exportedAt", OffsetDateTime.now().toString());
         out.put("format", "fitona-export-v1");
-        List<FoodDto> mine = foods.search(u, "", 50).stream().filter(FoodDto::editable).toList();
+        List<FoodDto> mine = foods.listOwn(u);
         out.put("foods", mine);
         List<RecipeDto> rs = new ArrayList<>();
         for (RecipeDto.Summary s : recipes.list(u)) rs.add(recipes.get(u, s.id()));

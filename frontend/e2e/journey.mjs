@@ -101,6 +101,18 @@ try {
   await page.waitForSelector('h2:has-text("Total del día")');
   check('registrar una ración de la receta suma al día (384 kcal mínimo)', /≥ 384 kcal|384 kcal/.test(await page.locator('main').innerText()));
 
+  // 5b) Catálogo de arranque y recetas típicas
+  await page.getByRole('link', { name: 'Alimentos' }).click();
+  await page.getByLabel('Buscar').fill('batata');
+  await page.waitForSelector('text=Boniato');
+  const cat = await page.locator('main').innerText();
+  check('el catálogo encuentra «batata» como Boniato y avisa de que es aproximado y sin verificar', /Boniato/.test(cat) && /sin verificar/.test(cat));
+  await page.getByRole('link', { name: 'Recetas' }).click();
+  await page.getByRole('button', { name: 'Añadir a mis recetas' }).first().click();
+  await page.waitForSelector('h1:has-text("Tortilla de patatas")');
+  const tort = await page.locator('main').innerText();
+  check('una receta típica se copia y se calcula con el catálogo (tortilla ≈ 329 kcal/ración)', /329 kcal/.test(tort), tort.split('\n').find((l) => /kcal/.test(l)) ?? '');
+
   // 6) Datos del usuario
   await page.getByRole('link', { name: 'Yo' }).click();
   const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: /Descargar mis datos/ }).click()]);

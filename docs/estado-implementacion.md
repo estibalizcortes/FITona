@@ -8,11 +8,18 @@
 |---|---|---|
 | Esquema Oracle (70 tablas) + migraciones + 19 pruebas de humo | Implementado y probado | Oracle 26ai Free (contenedor remoto) |
 | Motor nutricional (`backend/nutrition`) | Implementado y probado: 25 pruebas unitarias | Maven, JDK 21 (remoto) |
-| API REST Quarkus (`backend/app`) | Implementado y probado: 9 pruebas de integración contra Oracle real | Remoto |
-| Frontend Angular 22 (`frontend`) | Implementado; 6 pruebas unitarias; recorrido en Chromium real 12/12 | Remoto |
+| API REST Quarkus (`backend/app`) | Implementado y probado: 11 pruebas de integración contra Oracle real | Remoto |
+| Frontend Angular 22 (`frontend`) | Implementado; 6 pruebas unitarias; recorrido en Chromium real 14/14 | Remoto |
 | Docker Compose (Oracle + migraciones + backend + nginx) | Cableado **probado** en remoto con imágenes runtime precompiladas; **la construcción multi-etapa de los Dockerfiles NO se ha ejecutado** | Remoto (parcial) |
 | Scripts PowerShell | Escritos, **no ejecutados** (sin PowerShell remoto) | — |
 | Todo lo anterior en **tu Windows** | **Pendiente de que lo ejecutes** | — |
+
+## Catálogo de arranque y recetas típicas (nuevo)
+
+- **46 alimentos genéricos** precargados (`V010`), con medidas caseras (1 huevo, 1 vaso, 1 cucharada…), sinónimos (batata = boniato, habichuelas = judías verdes, queso granulado = queso cottage) y variantes crudo/cocido separadas (arroz, pasta, patata, pollo).
+- **¡Valores sin verificar!** Son cifras de referencia aproximadas, escritas a mano (típicas de tablas tipo USDA), **no descargadas ni contrastadas con la fuente**. Por eso salen como «Estimación (~)» y con la etiqueta «aproximado, sin verificar». Hay que sustituirlas por una importación verificada (BEDCA con autorización de AESAN, USDA CC0 o CIQUAL). El generador está en `database/seed/generate_starter_catalog.py`.
+- **12 recetas típicas** copiables a «Mis recetas» (tortilla de patatas, lentejas, arroz con pollo…). Las cantidades son orientativas y los nutrientes los calcula el motor con el catálogo (tortilla: 329 kcal/ración, probado).
+- Los alimentos del catálogo no se pueden editar ni borrar; los productos de marca no se precargan (el modelo usa un alimento genérico medio: «Chocolate negro 70-85 %»).
 
 ## Funcionalidades utilizables hoy (verificadas en navegador)
 
@@ -29,7 +36,7 @@
 ## Limitaciones reales (no esconderlas)
 
 - **Sin autenticación real.** Solo hay una identidad de *desarrollo* (UUID en el navegador enviado en `X-Dev-User`). Cualquiera que conozca ese UUID ve esos datos. Keycloak/OIDC **no está implementado** (ADR-004). No usar con datos reales ni exponer a Internet.
-- **El catálogo compartido está vacío.** No se ha cargado ningún valor nutricional de BEDCA/USDA/CIQUAL: no se inventan datos, y desde este entorno la API de USDA no era accesible. Los alimentos son los que crea la persona (fiabilidad «dato personalizado»). Falta el importador con procedencia y licencia (v0.1 pendiente).
+- **El catálogo de arranque (46 alimentos) NO está verificado** (ver arriba). Faltan muchos alimentos y el importador con procedencia y licencia (BEDCA/USDA/CIQUAL). Desde este entorno la API de USDA no era accesible.
 - **Solo valores por 100 g** (los líquidos usan densidad); no hay «por 100 ml».
 - **Búsqueda difusa/sinónimos**: solo búsqueda por contiene, sin tolerancia a erratas ni sinónimos (batata/boniato) todavía; la tabla de nombres ya los admite.
 - **Edición de recetas en la interfaz** no existe (la API crea versión nueva; la pantalla solo crea y consulta).

@@ -68,6 +68,7 @@ class ApiJourneyTest {
 
         // Al buscar, lo usado aparece primero y el buscador ignora tildes y mayúsculas
         as(me).get("/api/v1/foods?q=MANZANA").then().body("[0].variantId", equalTo((int) variantId));
+        as(me).get("/api/v1/foods?q=manzana").then().body("name", org.hamcrest.Matchers.hasItems("Manzana", "Manzana de prueba"));
 
         as(me).delete("/api/v1/diary/entries/" + entryId).then().statusCode(204);
         as(me).get("/api/v1/diary?date=" + today).then().body("entries", empty());
@@ -101,7 +102,7 @@ class ApiJourneyTest {
                 + ",\"quantity\":100,\"unitCode\":\"G\"}]}").post("/api/v1/recipes").then().statusCode(201).extract().path("id");
 
         as(b).get("/api/v1/foods/" + v).then().statusCode(404);
-        as(b).get("/api/v1/foods?q=manzana").then().body("", empty());
+        as(b).get("/api/v1/foods?q=prueba").then().body("", empty());
         as(b).get("/api/v1/diary/entries/" + entryId).then().statusCode(404);
         as(b).delete("/api/v1/diary/entries/" + entryId).then().statusCode(404);
         as(b).get("/api/v1/diary?date=" + today).then().body("entries", empty());
@@ -219,5 +220,45 @@ class ApiJourneyTest {
         as(me).get("/api/v1/me/export").then().statusCode(200).body("foods", empty()).body("recipes", empty())
                 .body("diaryEntries", empty());
         as(me).get("/api/v1/foods/" + v).then().statusCode(404);
+    }
+
+    @Test
+    void starterCatalogIsSearchableLabelledAsUnverifiedAndKeepsRawAndCookedApart() {
+        UUID me = UUID.randomUUID();
+        as(me).get("/api/v1/foods?q=batata").then().statusCode(200).body("name", org.hamcrest.Matchers.hasItem("Boniato"));
+        as(me).get("/api/v1/foods?q=Habichuelas").then().body("name", org.hamcrest.Matchers.hasItem("Judías verdes"));
+        as(me).get("/api/v1/foods?q=queso granulado").then().body("name", org.hamcrest.Matchers.hasItem("Queso cottage"));
+        Response rice = as(me).get("/api/v1/foods?q=arroz");
+        rice.then().body("$", hasSize(2)).body("quality", org.hamcrest.Matchers.everyItem(equalTo("ESTIMATE")))
+                .body("source", org.hamcrest.Matchers.everyItem(containsString("sin verificar")))
+                .body("editable", org.hamcrest.Matchers.everyItem(equalTo(false)));
+        // 100 g de arroz crudo y 100 g de arroz cocido NO son equivalentes (365 frente a 130 kcal)
+        rice.then().body("find { it.displayName.contains('crudo') }.per100.energyKcal", equalTo(365))
+                .body("find { it.displayName.contains('cocido') }.per100.energyKcal", equalTo(130));
+        // Un alimento del catálogo no se puede editar ni borrar
+        long id = rice.jsonPath().getLong("[0].variantId");
+        as(me).body(APPLE).put("/api/v1/foods/" + id).then().statusCode(404);
+        as(me).delete("/api/v1/foods/" + id).then().statusCode(404);
+        // Medida casera del huevo y registro con cantidad en unidades
+        long egg = as(me).get("/api/v1/foods?q=huevo").jsonPath().getLong("[0].variantId");
+        as(me).body("{\"items\":[{\"variantId\":" + egg + ",\"quantity\":2,\"unitCode\":\"UNIT\"}]}").post("/api/v1/calc")
+                .then().statusCode(200).body("items[0].grams", equalTo(110)).body("total.quality", equalTo("ESTIMATE"));
+    }
+
+    @Test
+    void typicalRecipesCanBeCopiedAndAreComputedByTheEngine() {
+        UUID me = UUID.randomUUID();
+        as(me).get("/api/v1/recipes/templates").then().statusCode(200).body("$", hasSize(12));
+        // 500 g patata + 5 huevos + 1 cebolla + 4 cucharadas de aceite = 1.317 kcal en total / 4 raciones
+        as(me).post("/api/v1/recipes/templates/tortilla-de-patatas/copy").then().statusCode(201)
+                .body("title", equalTo("Tortilla de patatas")).body("completeness", equalTo("COMPLETE"))
+                .body("perServing.nutrients.energyKcal.value", equalTo(329))
+                .body("perServing.quality", equalTo("ESTIMATE"));
+        as(me).get("/api/v1/recipes").then().body("$", hasSize(1));
+        as(me).post("/api/v1/recipes/templates/no-existe/copy").then().statusCode(404);
+        // todas las plantillas se resuelven contra el catálogo (si falta un alimento, esta prueba falla)
+        for (String key : as(me).get("/api/v1/recipes/templates").jsonPath().getList("key", String.class)) {
+            as(me).post("/api/v1/recipes/templates/" + key + "/copy").then().statusCode(201).body("completeness", equalTo("COMPLETE"));
+        }
     }
 }

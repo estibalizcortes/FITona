@@ -2,7 +2,7 @@
 
 Aplicación de alimentación, nutrición y vida cotidiana: **tu menú se adapta a tu vida**. Organiza despensa → plan → compra → diario → sobras; los números son opcionales y no hay culpa.
 
-> **Estado:** v0.1 en construcción. **Funciona de extremo a extremo en navegador** (crear alimento → registrar en una comida → calcular → guardar → volver a consultar; recetas; modos de uso), probado en el entorno de desarrollo remoto. **Sin autenticación real** y **catálogo compartido vacío**. Detalle honesto en [docs/estado-implementacion.md](docs/estado-implementacion.md).
+> **Estado:** v0.1 en construcción. **Funciona de extremo a extremo en navegador** (crear alimento → registrar en una comida → calcular → guardar → volver a consultar; recetas; modos de uso), probado en el entorno de desarrollo remoto. **sin autenticación real**; catálogo de arranque de 46 alimentos **aproximados y sin verificar** y 12 recetas típicas. Detalle honesto en [docs/estado-implementacion.md](docs/estado-implementacion.md).
 
 ## Arranque rápido (Windows 11 + PowerShell + Docker Desktop)
 

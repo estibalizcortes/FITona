@@ -28,11 +28,27 @@ public class RecipeResource {
     RecipeService service;
 
     @Inject
+    RecipeTemplates templates;
+
+    @Inject
     CurrentUser user;
 
     @GET
     public List<RecipeDto.Summary> list() {
         return service.list(user.id());
+    }
+
+    @GET
+    @Path("/templates")
+    public List<RecipeTemplates.Summary> templates() {
+        return templates.list();
+    }
+
+    @POST
+    @Path("/templates/{key}/copy")
+    public Response copyTemplate(@PathParam("key") String key) {
+        RecipeDto r = templates.copy(user.id(), key);
+        return Response.created(URI.create("/api/v1/recipes/" + r.id())).entity(r).build();
     }
 
     @GET

@@ -35,9 +35,14 @@ public class FoodRepository {
     Db db;
 
     public List<FoodRecord> search(UUID user, String q, int limit) {
+        return search(user, q, limit, false);
+    }
+
+    public List<FoodRecord> search(UUID user, String q, int limit, boolean ownOnly) {
         List<String> tokens = TextKeys.tokens(q);
         StringBuilder sql = new StringBuilder(SELECT)
                 .append("LEFT JOIN USER_FOOD_USAGE u ON u.USER_ID = ? AND u.VARIANT_ID = v.ID WHERE ").append(VISIBLE);
+        if (ownOnly) sql.append(" AND f.OWNER_USER_ID IS NOT NULL");
         for (int i = 0; i < tokens.size(); i++) {
             sql.append(" AND EXISTS (SELECT 1 FROM FOOD_NAMES n WHERE n.FOOD_ID = f.ID AND n.NAME_KEY LIKE ?)");
         }
@@ -50,6 +55,14 @@ public class FoodRepository {
             ps.setInt(i, limit);
         }, FoodRepository::map);
         return withPortions(rows);
+    }
+
+    /** Variante del catálogo compartido por nombre exacto (y etiqueta si se indica; si no, la variante por defecto). */
+    public Long findCatalogVariantId(String name, String label) {
+        return db.queryOne("SELECT v.ID FROM FOODS f JOIN FOOD_VARIANTS v ON v.FOOD_ID = f.ID WHERE f.OWNER_USER_ID IS NULL "
+                + "AND f.STATUS = 'PUBLISHED' AND v.STATUS = 'PUBLISHED' AND f.CANONICAL_NAME = ? "
+                + "AND (? IS NULL OR v.VARIANT_LABEL = ?) ORDER BY CASE WHEN v.IS_DEFAULT THEN 0 ELSE 1 END FETCH FIRST 1 ROWS ONLY",
+                ps -> { ps.setString(1, name); ps.setString(2, label); ps.setString(3, label); }, rs -> rs.getLong(1));
     }
 
     public FoodRecord findVariant(UUID user, long variantId) {
@@ -98,7 +111,7 @@ public class FoodRepository {
         boolean editable = rs.getInt(18) == 1;
         return new FoodRecord(rs.getLong(1), rs.getLong(2), rs.getString(3), rs.getString(4),
                 new NutrientProfile(m, Quality.valueOf(rs.getString(16))), rs.getLong(5), rs.getString(6),
-                rs.getBigDecimal(17), List.of(), editable, editable ? "Dato personalizado" : "Catálogo");
+                rs.getBigDecimal(17), List.of(), editable, editable ? "Dato personalizado" : "Catálogo de arranque (aproximado, sin verificar)");
     }
 
     // ---- escritura (solo alimentos propios y privados) ----

@@ -30,6 +30,7 @@ import { Prefs } from '../core/prefs';
             <span class="muted small">
               @if (prefs.mode() !== 'SIMPLE') { {{ kcal(f) }} por 100 g · }
               <span [title]="rel(f).label"><span aria-hidden="true">{{ rel(f).symbol }}</span> {{ rel(f).label }}</span>
+              @if (!f.editable) { · {{ f.source }} }
             </span>
           </button>
         </li>

@@ -32,6 +32,10 @@ export class Api {
   recipes(): Promise<RecipeSummary[]> { return firstValueFrom(this.http.get<RecipeSummary[]>(`${this.base}/recipes`)); }
   recipe(id: string): Promise<Recipe> { return firstValueFrom(this.http.get<Recipe>(`${this.base}/recipes/${id}`)); }
   createRecipe(r: RecipeRequest): Promise<Recipe> { return firstValueFrom(this.http.post<Recipe>(`${this.base}/recipes`, r)); }
+  recipeTemplates(): Promise<{ key: string; title: string; servings: number; ingredients: number }[]> {
+    return firstValueFrom(this.http.get<{ key: string; title: string; servings: number; ingredients: number }[]>(`${this.base}/recipes/templates`));
+  }
+  copyRecipeTemplate(key: string): Promise<Recipe> { return firstValueFrom(this.http.post<Recipe>(`${this.base}/recipes/templates/${key}/copy`, {})); }
   deleteRecipe(id: string): Promise<void> { return firstValueFrom(this.http.delete<void>(`${this.base}/recipes/${id}`)); }
 
   exportData(): Promise<unknown> { return firstValueFrom(this.http.get<unknown>(`${this.base}/me/export`)); }

@@ -40,6 +40,11 @@ public class FoodService {
         return repo.search(user, q, l).stream().map(FoodService::toDto).toList();
     }
 
+    /** Solo los alimentos propios (sin límite práctico), para exportar los datos de la persona. */
+    public List<FoodDto> listOwn(UUID user) {
+        return repo.search(user, "", 1000, true).stream().map(FoodService::toDto).toList();
+    }
+
     public FoodDto get(UUID user, long variantId) {
         FoodRecord r = repo.findVariant(user, variantId);
         if (r == null) throw new NotFoundException();
