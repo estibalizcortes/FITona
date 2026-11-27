@@ -2,24 +2,28 @@
 <div class="chrome">
 @if (session.token()) {
 <header class="topbar">
-  <a routerLink="/inicio" class="brand" aria-label="FITona, ir al inicio (módulos)"><img src="icons/icon-48.png" alt="" width="28" height="28" />FITona@if (module() === 'food') { <small>· Comida</small> } @else if (module() === 'work') { <small>· Trabajo</small> }</a>
-  @if (module() === 'food') {
-  <label class="mode">
-    <span class="sr-only">Modo de uso</span>
-    <select [value]="prefs.mode()" (change)="setMode($event)" aria-label="Modo de uso">
-      @for (m of modes; track m.value) {
-        <option [value]="m.value" [selected]="m.value === prefs.mode()">{{ m.label }}</option>
-      }
-    </select>
-  </label>
+  <a routerLink="/inicio" class="brand" aria-label="FITona, volver a todos los módulos">@if (module()) { <span aria-hidden="true">‹</span> }<img src="icons/icon-48.png" alt="" width="28" height="28" /><span [class.sr-only]="!!module()">FITona</span></a>
+  @if (module(); as m) {
+    <span class="pill"><app-icon [d]="m.icon" /><span class="pill-name">{{ m.name }}</span></span>
+    <span class="grow"></span>
+    @if (m.id === 'food') {
+    <label class="mode">
+      <span class="sr-only">Modo de uso</span>
+      <select [value]="prefs.mode()" (change)="setMode($event)" aria-label="Modo de uso">
+        @for (o of modes; track o.value) {
+          <option [value]="o.value" [selected]="o.value === prefs.mode()">{{ o.label }}</option>
+        }
+      </select>
+    </label>
+    }
+    <a class="me-link" [routerLink]="m.me" aria-label="Yo: perfil, datos y preferencias">👤</a>
+  } @else {
+    <span class="grow"></span>
+    <a class="me-link" routerLink="/ajustes" aria-label="Yo: perfil, datos y preferencias">👤</a>
   }
 </header>
 }
-@if (status.notice() === 'offline') {
-  <p class="notice err" role="alert">Sin conexión a Internet. Puedes seguir viendo lo que ya está en pantalla, pero no se puede guardar ni consultar hasta que vuelva la conexión.</p>
-} @else if (status.notice() === 'waking') {
-  <p class="notice info" role="status">El servidor gratuito se está despertando… puede tardar hasta un minuto. No cierres la app.</p>
-}
+<app-connection-banner />
 @if (updates.ready()) {
   <p class="notice ok" role="status"><span>Hay una versión nueva de FITona.</span><button type="button" (click)="updates.apply()">Actualizar</button></p>
 }
@@ -29,20 +33,10 @@
   <router-outlet />
 </main>
 
-@if (module() === 'food') {
-<nav class="tabbar" aria-label="Menú de Comida">
-  <a routerLink="/hoy" routerLinkActive="active"><span aria-hidden="true">🍽</span>Hoy</a>
-  <a routerLink="/plan" routerLinkActive="active"><span aria-hidden="true">📋</span>Plan</a>
-  <a routerLink="/registrar" routerLinkActive="active" class="add" aria-label="Registrar comida"><span aria-hidden="true">＋</span><b>Registrar</b></a>
-  <a routerLink="/recetas" routerLinkActive="active"><span aria-hidden="true">📖</span>Recetas</a>
-  <a routerLink="/yo" routerLinkActive="active"><span aria-hidden="true">👤</span>Yo</a>
-</nav>
-} @else if (module() === 'work') {
-<nav class="tabbar" aria-label="Menú de Trabajo">
-  <a routerLink="/trabajo" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"><span aria-hidden="true">🏠</span>Hoy</a>
-  <a routerLink="/trabajo/calendario" routerLinkActive="active"><span aria-hidden="true">🗓</span>Calendario</a>
-  <a routerLink="/trabajo/registrar" routerLinkActive="active" class="add" aria-label="Registrar nota"><span aria-hidden="true">＋</span><b>Registrar</b></a>
-  <a routerLink="/trabajo/historial" routerLinkActive="active"><span aria-hidden="true">🕘</span>Historial</a>
-  <a routerLink="/trabajo/yo" routerLinkActive="active"><span aria-hidden="true">👤</span>Yo</a>
+@if (module(); as m) {
+<nav class="tabbar" [attr.aria-label]="'Menú de ' + m.name">
+  @for (n of m.nav; track n.path) {
+    <a [routerLink]="n.path" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: !!n.exact }" [class.add]="n.add" [attr.aria-label]="n.aria ?? null"><span aria-hidden="true">{{ n.icon }}</span>@if (n.add) { <b>{{ n.label }}</b> } @else { {{ n.label }} }</a>
+  }
 </nav>
 }

@@ -8,10 +8,9 @@ const SHOTS = process.env.SHOTS_DIR ?? 'e2e/screenshots';
 mkdirSync(SHOTS, { recursive: true });
 
 const results = [];
-// «Alimentos» ya no está en el menú inferior de Comida: se llega desde Yo -> Mis alimentos.
+// «Alimentos» está en el menú inferior de Comida.
 async function goFoods(page) {
-  await page.locator('nav.tabbar a', { hasText: 'Yo' }).click();
-  await page.getByRole('link', { name: 'Mis alimentos' }).click();
+  await page.locator('nav.tabbar a', { hasText: 'Alimentos' }).click();
   await page.waitForSelector('h1:has-text("Alimentos")');
 }
 function check(name, ok, detail = '') {
@@ -278,7 +277,7 @@ try {
   await page.screenshot({ path: `${SHOTS}/5-categorias.png` });
 
   // 6) Datos del usuario
-  await page.getByRole('link', { name: 'Yo' }).click();
+  await page.locator('a.me-link').click();
   const [download] = await Promise.all([
     page.waitForEvent('download'),
     page.getByRole('button', { name: /Descargar mis datos/ }).click(),

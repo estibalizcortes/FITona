@@ -40,7 +40,7 @@ public class AuthFilter {
     @ServerRequestFilter
     public Response filter(ContainerRequestContext ctx) {
         String path = ctx.getUriInfo().getPath();
-        if (path.endsWith("/api/v1/auth/register") || path.endsWith("/api/v1/auth/login")) return null;
+        if (path.endsWith("/api/v1/auth/register") || path.endsWith("/api/v1/auth/login") || path.endsWith("/api/v1/status")) return null;
         String token = bearer(ctx.getHeaderString("Authorization"));
         if (token != null) {
             UUID id = auth.userForToken(token);

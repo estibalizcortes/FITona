@@ -26,5 +26,7 @@ export const routes: Routes = [
   { path: 'recetas/:id/editar', canActivate: [authGuard], title: 'Editar receta · FITona', loadComponent: () => import('./pages/recipe-form-page').then((m) => m.RecipeFormPage) },
   { path: 'recetas/:id', canActivate: [authGuard], title: 'Receta · FITona', loadComponent: () => import('./pages/recipe-detail-page').then((m) => m.RecipeDetailPage) },
   { path: 'yo', canActivate: [authGuard], title: 'Yo · FITona', loadComponent: () => import('./pages/me-page').then((m) => m.MePage) },
+  { path: 'ajustes', canActivate: [authGuard], title: 'Yo · FITona', data: { module: 'general' }, loadComponent: () => import('./pages/me-page').then((m) => m.MePage) },
+  { path: 'mi-fiona', canActivate: [authGuard], title: 'Mi Fiona · FITona', loadComponent: () => import('./pages/mi-fiona-page').then((m) => m.MiFionaPage) },
   { path: '**', redirectTo: 'inicio' },
 ];

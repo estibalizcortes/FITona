@@ -20,10 +20,17 @@ FROM ${JRE_IMAGE} AS runtime
 RUN useradd --system --create-home --uid 10001 fitona
 WORKDIR /app
 COPY --from=build --chown=fitona /src/backend/app/target/quarkus-app/ /app/
+COPY --chown=fitona backend/cds-train.sh /cds-train.sh
 USER fitona
+# AppCDS: archivo de clases precargadas (arranque en frío ~30 % más rápido con 0,1 CPU). Si no se genera, la imagen arranca igual.
+RUN bash /cds-train.sh
 # Render inyecta PORT (por defecto 10000); la app escucha en ese puerto (quarkus.http.port=${PORT:8080}).
 EXPOSE 10000
-# Memoria: heap máx. 256 MB (resto: metaspace, hilos, buffers) y recolector serie. NO limitar el compilador a C1: con C2 el hash
-# de contraseñas (PBKDF2 600000) tarda ~3 s en vez de ~19 s con 0,1 CPU (medido).
+# Memoria: heap máx. 256 MB (resto: metaspace, hilos, buffers) y recolector serie. Medido a 0,1 CPU / 512 MB con la app real:
+#   sin ajustes: Quarkus 37,5 s, listo en 45,7 s | + AppCDS: 28,6 s / 31,8 s | + AppCDS + solo C1 (TieredStopAtLevel=1): 16,1 s / 17,9 s
+# Coste de C1: cada inicio de sesión tarda ~17 s (con C2 el primero tras arrancar tarda ~20 s y los siguientes ~2 s); las sesiones
+# duran 90 días, así que se inicia sesión pocas veces y el arranque se sufre cada vez que Render despierta. Para volver a C2: añade
+# -XX:TieredStopAtLevel=4 a JAVA_OPTS (las opciones de JAVA_OPTS van después y prevalecen).
 ENV JAVA_OPTS="-Xms32m -Xmx256m -XX:MaxMetaspaceSize=128m -Xss512k -XX:+UseSerialGC -XX:+ExitOnOutOfMemoryError"
-ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar /app/quarkus-run.jar"]
+# El ajuste de arranque va en el ENTRYPOINT (no en JAVA_OPTS) para que aplique aunque la variable JAVA_OPTS del panel de Render sea la antigua.
+ENTRYPOINT ["sh", "-c", "exec java -XX:SharedArchiveFile=/app/app.jsa -XX:TieredStopAtLevel=1 -XX:-UsePerfData $JAVA_OPTS -jar /app/quarkus-run.jar"]

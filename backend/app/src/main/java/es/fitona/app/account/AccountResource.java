@@ -36,6 +36,9 @@ public class AccountResource {
     CurrentUser user;
 
     @Inject
+    es.fitona.app.prefs.PreferencesResource prefs;
+
+    @Inject
     FoodService foods;
 
     @Inject
@@ -73,6 +76,7 @@ public class AccountResource {
         out.put("diaryEntries", entries);
         out.put("nutritionProfile", goals.get(u));
         out.put("workEntries", work.all(u));
+        out.put("preferences", prefs.get());
         return out;
     }
 

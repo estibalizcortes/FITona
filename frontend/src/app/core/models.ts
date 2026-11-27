@@ -122,3 +122,9 @@ export type WorkKind = 'NOTE' | 'SUMMARY' | 'PROMPT';
 export interface WorkEntry { id: string; date: string; kind: WorkKind; title: string | null; body: string; length: number; truncated: boolean; createdAt: string; updatedAt: string }
 export interface WorkEntryRequest { date: string; kind: WorkKind; title: string | null; body: string }
 export interface CalendarDay { date: string; count: number }
+
+/** Preferencias de la pantalla principal guardadas en la cuenta. */
+export interface AccountPrefs { homeOrder: string[]; homeHidden: string[]; homeIndicators: boolean }
+
+/** Pantalla principal en una sola petición: preferencias de la cuenta + resumen de hoy. */
+export interface HomeSummary { preferences: AccountPrefs; foodKcal: number | null; foodEntries: number; workEntries: number }

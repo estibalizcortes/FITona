@@ -1,0 +1,45 @@
+// Capturas de verificación visual (no es una prueba automática): node e2e/visual.mjs [carpeta]. Tamaño de iPhone 15 (393×852 @2x).
+import { chromium } from 'playwright';
+import { mkdirSync } from 'node:fs';
+const OUT = process.argv[2] ?? '/tmp/claude-0/shots';
+mkdirSync(OUT, { recursive: true });
+const BASE = process.env.BASE_URL ?? 'http://localhost:4200';
+const br = await chromium.launch();
+const ctx = await br.newContext({ viewport: { width: 393, height: 852 }, deviceScaleFactor: 2, locale: 'es-ES', isMobile: true, hasTouch: true });
+const p = await ctx.newPage();
+const shot = (n) => p.screenshot({ path: `${OUT}/${n}.png` });
+const go = async (path) => { await p.evaluate((r) => { history.pushState({}, '', r); dispatchEvent(new PopStateEvent('popstate')); }, path); await p.waitForTimeout(900); };
+await p.goto(BASE); await p.waitForSelector('h1:has-text("Entrar")');
+await shot('00-entrar');
+await p.getByRole('button', { name: 'Crear una cuenta' }).click();
+await p.getByLabel('Correo electrónico').fill(`v${Date.now()}@example.com`);
+await p.getByLabel('Contraseña').fill('una-frase-larga-segura');
+await p.getByLabel('Soy mayor de edad').check(); await p.getByLabel(/Acepto que FITona guarde/).check();
+await p.getByRole('button', { name: 'Crear cuenta' }).click();
+await p.waitForSelector('a.module', { timeout: 60000 });
+// un registro de Trabajo de hoy para ver el dato en la tarjeta
+const tok = await p.evaluate(() => JSON.parse(localStorage.getItem('fitona.session')).token);
+const today = new Date().toISOString().slice(0, 10);
+await p.evaluate(async ([t, d]) => { await fetch('/api/v1/work/entries', { method: 'POST', headers: { 'content-type': 'application/json', authorization: 'Bearer ' + t }, body: JSON.stringify({ date: d, kind: 'NOTE', title: 'Revisar el visor', body: 'Preparar la demo del visor externo' }) }); }, [tok, today]);
+await go('/inicio'); await p.reload(); await p.waitForSelector('a.module'); await p.waitForTimeout(1500);
+await shot('01-inicio');
+await p.getByRole('button', { name: 'Personalizar' }).click(); await p.waitForTimeout(300); await p.evaluate(() => scrollTo(0, 9999)); await shot('02-personalizar');
+await go('/inicio'); await p.getByRole('button', { name: 'Listo' }).click().catch(() => {});
+await p.locator('a.module', { hasText: 'Comida' }).click(); await p.waitForSelector('text=Aún no hay nada registrado'); await p.waitForTimeout(600);
+await shot('03-comida-hoy');
+await p.locator('nav.tabbar a', { hasText: 'Registrar' }).click(); await p.waitForTimeout(900); await shot('04-comida-registrar');
+await p.locator('nav.tabbar a', { hasText: 'Plan' }).click(); await p.waitForTimeout(900); await shot('05-comida-plan');
+await go('/yo/perfil'); await shot('06-formulario-perfil');
+await go('/trabajo'); await p.waitForTimeout(600); await shot('07-trabajo-hoy');
+await p.locator('nav.tabbar a', { hasText: 'Calendario' }).click(); await p.waitForTimeout(900); await shot('08-trabajo-calendario');
+await p.locator('nav.tabbar a', { hasText: 'Registrar' }).click(); await p.waitForTimeout(900); await shot('09-trabajo-registrar');
+await go('/mi-fiona'); await p.evaluate(() => scrollTo(0, 0)); await shot('10-mi-fiona');
+// estados de carga: servidor despertando (consulta de estado lenta) y sin conexión
+await ctx.route('**/api/v1/status', async (r) => { await new Promise((s) => setTimeout(s, 12000)); await r.continue().catch(() => {}); });
+await p.reload(); await p.waitForSelector('.conn', { timeout: 15000 }); await p.waitForTimeout(500); await shot('11-despertando');
+await ctx.unroute('**/api/v1/status');
+await ctx.route('**/api/v1/home**', async (r) => { await new Promise((x) => setTimeout(x, 6000)); await r.continue().catch(() => {}); });
+await go('/inicio'); await p.reload(); await p.waitForSelector('a.module'); await p.waitForTimeout(700); await shot('13-esqueletos-carga');
+await ctx.unroute('**/api/v1/home**');
+await ctx.setOffline(true); await p.waitForSelector('.conn[data-notice="offline"]', { timeout: 8000 }).catch(() => {}); await p.waitForTimeout(400); await shot('12-sin-conexion');
+await br.close(); console.log('capturas en', OUT);

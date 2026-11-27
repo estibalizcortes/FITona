@@ -2,15 +2,18 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { Router, RouterLink } from '@angular/router';
 import { Api, errorMessage } from '../core/api';
 import { Session } from '../core/session';
+import { Fiona } from '../shared/fiona';
 
 @Component({
   selector: 'app-login-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink],
+  imports: [RouterLink, Fiona],
+  styles: ['.login-head { display: flex; align-items: center; gap: .8rem; } .login-head h1 { margin: 0; }'],
   template: `
     <section>
-      <h1>{{ creating() ? 'Crear cuenta' : 'Entrar' }}</h1>
+      <div class="login-head"><app-fiona [pose]="busy() ? 'waiting' : 'greeting'" [size]="96" label="Fiona" /><h1>{{ creating() ? 'Crear cuenta' : 'Entrar' }}</h1></div>
       <p class="muted">Tu cuenta guarda tus alimentos, recetas y registros para que no los pierdas si cambias de móvil.</p>
+      @if (busy()) { <p class="muted small" role="status">Comprobando tu contraseña de forma segura: en este servidor gratuito puede tardar hasta 20 segundos.</p> }
       @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
       <form (submit)="submit($event)">
         <label class="field">

@@ -3,6 +3,7 @@ import { Api, errorMessage } from '../core/api';
 import { Router, RouterLink } from '@angular/router';
 import { Install } from '../core/install';
 import { Session } from '../core/session';
+import { ServerStatus } from '../core/server-status';
 
 @Component({
   selector: 'app-me-page',
@@ -12,7 +13,7 @@ import { Session } from '../core/session';
     <section>
       <h1>Yo</h1>
 
-      @if (module() !== 'work') {
+      @if (!module() || module() === 'food') {
       <article class="card">
         <h2>Perfil nutricional</h2>
         <p class="muted">Tus datos (altura, peso, actividad…) para calcular tu objetivo calórico orientativo.</p>
@@ -25,6 +26,25 @@ import { Session } from '../core/session';
           (energía aproximada) y <strong>Avanzado</strong> (energía y macros). Cambiar de modo no borra ni oculta datos guardados.</p>
       </article>
       }
+
+      <article class="card">
+        <h2>Mi Fiona</h2>
+        <p class="muted">Conoce a Fiona, la mascota de FITona. Pronto podrás personalizarla.</p>
+        <div class="actions"><a class="btn" routerLink="/mi-fiona">Ver a Fiona</a></div>
+      </article>
+
+      <article class="card">
+        <h2>Estado del servidor</h2>
+        @if (status.info(); as i) {
+          <ul class="items">
+            <li>Respuesta del servidor: <strong>{{ i.rttMs }} ms</strong> (desde este dispositivo)</li>
+            <li>Servidor encendido desde hace: <strong>{{ uptimeText(i.uptimeSeconds) }}</strong>{{ i.uptimeSeconds < 120 ? ' (acaba de despertar)' : '' }}</li>
+            <li>Base de datos: <strong>{{ i.db === 'ok' ? 'responde' : i.db === 'slow' ? 'lenta (despertando)' : 'no responde' }}</strong> ({{ i.dbMs }} ms)</li>
+          </ul>
+        } @else { <p class="muted">Aún no hay datos de esta sesión.</p> }
+        <div class="actions"><button type="button" class="btn" (click)="status.wake()">Comprobar ahora</button></div>
+        <p class="muted small">Es una única consulta que no lleva datos tuyos. Sirve para saber si el servidor gratuito estaba dormido.</p>
+      </article>
 
       <article class="card">
         <h2>Módulos</h2>
@@ -74,6 +94,8 @@ export class MePage {
   private readonly api = inject(Api);
   /** 'work' desde /trabajo/yo (route data): oculta lo que es solo del módulo Comida. */
   readonly module = input<string | undefined>();
+  protected readonly status = inject(ServerStatus);
+  protected uptimeText(s: number): string { return s < 90 ? `${s} s` : s < 5400 ? `${Math.round(s / 60)} min` : `${Math.round(s / 3600)} h`; }
   protected readonly session = inject(Session);
   protected readonly install = inject(Install);
   private readonly router = inject(Router);

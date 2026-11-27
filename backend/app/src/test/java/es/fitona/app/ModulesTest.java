@@ -53,6 +53,49 @@ class ModulesTest {
         as(UUID.randomUUID()).get("/api/v1/nutrition/profile").then().statusCode(204);
     }
 
+    // ---------- Preferencias y estado ----------
+
+    @Test
+    void homePreferencesArePerAccountValidatedAndPrivate() {
+        UUID me = UUID.randomUUID();
+        as(me).get("/api/v1/me/preferences").then().statusCode(200).body("homeOrder", hasSize(0)).body("homeIndicators", equalTo(true));
+        // se guardan en el orden pedido; los identificadores desconocidos o repetidos se descartan
+        as(me).body(Map.of("homeOrder", List.of("work", "food", "work", "zzz"), "homeHidden", List.of("sport"), "homeIndicators", false))
+                .put("/api/v1/me/preferences").then().statusCode(200).body("homeOrder", equalTo(List.of("work", "food")));
+        as(me).get("/api/v1/me/preferences").then().body("homeOrder", equalTo(List.of("work", "food")))
+                .body("homeHidden", equalTo(List.of("sport"))).body("homeIndicators", equalTo(false));
+        // formato no válido -> 400 y nada cambia
+        as(me).body(Map.of("homeOrder", List.of("Food; DROP"), "homeHidden", List.of(), "homeIndicators", true))
+                .put("/api/v1/me/preferences").then().statusCode(400);
+        as(me).get("/api/v1/me/preferences").then().body("homeOrder", equalTo(List.of("work", "food")));
+        // otra cuenta no las ve
+        as(UUID.randomUUID()).get("/api/v1/me/preferences").then().body("homeOrder", hasSize(0));
+        // sin sesión no hay acceso
+        given().get("/api/v1/me/preferences").then().statusCode(401);
+        // y se exportan con los datos de la cuenta
+        as(me).get("/api/v1/me/export").then().statusCode(200).body("preferences.homeOrder", equalTo(List.of("work", "food")));
+    }
+
+    @Test
+    void homeSummaryJoinsPreferencesAndTodayInOneCallAndIsPrivate() {
+        UUID me = UUID.randomUUID();
+        String today = LocalDate.now().toString();
+        as(me).queryParam("date", today).get("/api/v1/home").then().statusCode(200)
+                .body("foodEntries", equalTo(0)).body("workEntries", equalTo(0)).body("preferences.homeIndicators", equalTo(true));
+        as(me).body(Map.of("date", today, "kind", "NOTE", "title", "x", "body", "y")).post("/api/v1/work/entries").then().statusCode(201);
+        as(me).body(Map.of("homeOrder", List.of("work"), "homeHidden", List.of(), "homeIndicators", true)).put("/api/v1/me/preferences").then().statusCode(200);
+        as(me).queryParam("date", today).get("/api/v1/home").then().body("workEntries", equalTo(1)).body("preferences.homeOrder", equalTo(List.of("work")));
+        // otra cuenta no ve nada de lo mío
+        as(UUID.randomUUID()).queryParam("date", today).get("/api/v1/home").then().body("workEntries", equalTo(0)).body("preferences.homeOrder", hasSize(0));
+        given().get("/api/v1/home").then().statusCode(401);
+    }
+
+    @Test
+    void statusIsPublicAndReportsDatabaseWithoutPersonalData() {
+        given().get("/api/v1/status").then().statusCode(200).body("api", equalTo("up")).body("db", equalTo("ok"))
+                .body("uptimeSeconds", greaterThan(-1)).body("$", not(org.hamcrest.Matchers.hasKey("email")));
+    }
+
     // ---------- Trabajo ----------
 
     @Test

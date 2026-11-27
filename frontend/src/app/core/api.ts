@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import {
+  AccountPrefs, HomeSummary,
   CalcResponse, Diary, DiaryEntry, Food, FoodCategory, FoodRequest, FoodResponse, ItemRequest, Recipe, RecipeRequest,
   RecipeSummary, Reference, TemplateDetail, TemplateSummary, CalendarDay, NutritionProfile, NutritionProfileResponse, PlanCandidate,
   PlanChosen, PlanResponse, PlanSlot, WorkEntry, WorkEntryRequest,
@@ -66,6 +67,9 @@ export class Api {
   }
 
   // Módulo Trabajo
+  home(date: string): Promise<HomeSummary> { return firstValueFrom(this.http.get<HomeSummary>(`${this.base}/home`, { params: { date } })); }
+  preferences(): Promise<AccountPrefs> { return firstValueFrom(this.http.get<AccountPrefs>(`${this.base}/me/preferences`)); }
+  savePreferences(p: AccountPrefs): Promise<AccountPrefs> { return firstValueFrom(this.http.put<AccountPrefs>(`${this.base}/me/preferences`, p)); }
   workDay(date: string): Promise<WorkEntry[]> { return firstValueFrom(this.http.get<WorkEntry[]>(`${this.base}/work/entries`, { params: { date } })); }
   workCalendar(month: string): Promise<CalendarDay[]> { return firstValueFrom(this.http.get<CalendarDay[]>(`${this.base}/work/calendar`, { params: { month } })); }
   workSearch(q: string, kind: string, offset: number, limit = 30): Promise<WorkEntry[]> {
@@ -90,7 +94,8 @@ export function errorMessage(e: unknown): string {
   if (offline && (status === 0 || status === 502 || status === 503 || status === 504)) {
     return 'Sin conexión a Internet. Revisa tu red y vuelve a intentarlo: no se ha guardado nada.';
   }
-  if (status === 0) return 'No se puede conectar con el servidor. Si acaba de estar parado, puede estar despertando: espera un minuto y reintenta.';
+  if ((e as { statusText?: string })?.statusText === 'timeout') return 'El servidor ha tardado demasiado en responder (tiempo de espera agotado). Pulsa «Reintentar»: si se repite, puede haber un problema en el servidor.';
+  if (status === 0) return 'No se puede conectar con el servidor. Puede estar parado o despertando: espera un momento y pulsa «Reintentar».';
   if (status === 502 || status === 503 || status === 504) {
     return 'El servidor no responde ahora mismo (el alojamiento gratuito puede estar despertando). Espera un minuto y vuelve a intentarlo.';
   }

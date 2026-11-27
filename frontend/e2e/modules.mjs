@@ -23,6 +23,9 @@ page.on('dialog', (d) => d.accept());
 const consoleErrors = [];
 page.on('console', (m) => { if (m.type() === 'error') consoleErrors.push(m.text()); });
 page.on('pageerror', (e) => consoleErrors.push(String(e)));
+const netLog = [];
+page.on('requestfailed', (r) => netLog.push('FAILED ' + r.url().slice(-60) + ' ' + (r.failure()?.errorText ?? '')));
+page.on('response', (r) => { if (r.status() >= 400) netLog.push(r.status() + ' ' + r.url().slice(-60)); });
 
 try {
   // 1) Entrar y ver el selector de módulos
@@ -39,10 +42,73 @@ try {
   check('pantalla principal: selector con los módulos Comida y Trabajo y sin menú inferior', mods.join() === 'Comida,Trabajo' && (await page.locator('nav.tabbar').count()) === 0, mods.join(' · '));
   await page.screenshot({ path: `${SHOTS}/m1-selector.png` });
 
+  // 1b) Base visual: próximos módulos, personalización, tema, sin scroll horizontal
+  const soon = (await page.locator('.module.soon strong').allInnerTexts()).join();
+  check('los módulos aún no construidos se ven como «Próximamente» (sin botón) y no inventan datos', soon === 'Salud,Economía,Deporte,Cuidado personal' && (await page.locator('a.module .stat').count()) === 0, soon);
+  check('pantalla principal sin scroll horizontal', await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth));
+  await page.getByRole('button', { name: 'Personalizar' }).click();
+  await page.getByRole('button', { name: 'Subir Trabajo' }).click();
+  await page.reload();
+  await page.waitForSelector('a.module');
+  check('el orden de los módulos se guarda al recargar', (await page.locator('a.module strong').allInnerTexts()).join() === 'Trabajo,Comida');
+  await page.getByRole('button', { name: 'Personalizar' }).click();
+  await page.getByRole('button', { name: 'Bajar Trabajo' }).click();
+  await page.getByRole('button', { name: 'Ocultar' }).first().click();
+  await page.waitForFunction(() => document.querySelectorAll('a.module').length === 1);
+  check('un módulo se puede ocultar', true);
+  await page.getByRole('button', { name: 'Ocultar' }).first().click(); // el último visible no se puede ocultar
+  check('no deja la pantalla sin módulos', (await page.locator('a.module').count()) === 1);
+  await page.getByRole('button', { name: 'Mostrar' }).click();
+  await page.getByRole('button', { name: 'Listo' }).click();
+  check('al volver a mostrarlo reaparecen los dos', (await page.locator('a.module strong').allInnerTexts()).join() === 'Comida,Trabajo');
+  // Solo tema claro: aunque el móvil esté en modo oscuro, FITona sigue luminosa (fondo vainilla)
+  const dark = await ctx.newPage();
+  await dark.emulateMedia({ colorScheme: 'dark' });
+  await dark.goto(BASE + '/inicio'); await dark.waitForSelector('a.module');
+  check('con el móvil en modo oscuro FITona sigue clara (fondo vainilla, sin modo oscuro)', (await dark.evaluate(() => getComputedStyle(document.body).backgroundColor)) === 'rgb(255, 247, 232)');
+  await dark.close();
+  // Las preferencias están en la cuenta: sin copia local siguen ahí (otro dispositivo)
+  await page.getByRole('button', { name: 'Personalizar' }).click();
+  await page.getByRole('button', { name: 'Subir Trabajo' }).click();
+  await page.waitForTimeout(800);
+  const other = await browser.newContext({ viewport: { width: 400, height: 860 }, locale: 'es-ES' });
+  const op = await other.newPage();
+  const sess = await page.evaluate(() => localStorage.getItem('fitona.session'));
+  await op.addInitScript((v) => localStorage.setItem('fitona.session', v), sess);
+  await op.goto(BASE + '/inicio'); await op.waitForFunction(() => document.querySelector('a.module strong')?.textContent === 'Trabajo', null, { timeout: 15000 }).catch(() => {});
+  check('el orden de los módulos se guarda en la cuenta (otro dispositivo sin copia local lo ve)', (await op.locator('a.module strong').allInnerTexts()).join() === 'Trabajo,Comida');
+  await other.close();
+  await page.getByRole('button', { name: 'Bajar Trabajo' }).click();
+  await page.waitForTimeout(500);
+  // Servidor despertando: la interfaz se ve al instante, el aviso es real y desaparece solo (sin bloquear la app)
+  const slowCtx = await browser.newContext({ viewport: { width: 400, height: 860 }, locale: 'es-ES' });
+  await slowCtx.route('**/api/v1/status', async (r) => { await new Promise((x) => setTimeout(x, 5000)); await r.continue().catch(() => {}); });
+  const sp = await slowCtx.newPage();
+  const sess2 = await page.evaluate(() => localStorage.getItem('fitona.session'));
+  await sp.addInitScript((v) => localStorage.setItem('fitona.session', v), sess2);
+  const t0 = Date.now();
+  await sp.goto(BASE + '/inicio'); await sp.waitForSelector('a.module');
+  const shownIn = Date.now() - t0;
+  await sp.waitForSelector('.conn[data-notice="waking"]', { timeout: 8000 });
+  check('con el servidor despertando se ve la pantalla principal enseguida y un aviso real con Fiona', shownIn < 4000 && (await sp.locator('a.module').count()) >= 2, `interfaz en ${shownIn} ms`);
+  await sp.waitForFunction(() => !document.querySelector('.conn'), null, { timeout: 12000 });
+  check('al responder el servidor el aviso desaparece solo', true);
+  await slowCtx.close();
+  // sin conexión: aviso distinto
+  await ctx.setOffline(true);
+  await page.waitForSelector('.conn[data-notice="offline"]', { timeout: 8000 });
+  check('sin conexión el aviso lo dice (y no habla de servidor despertando)', /Sin conexión/.test(await page.locator('.conn').innerText()));
+  await ctx.setOffline(false);
+  await page.waitForFunction(() => !document.querySelector('.conn'), null, { timeout: 15000 });
+
+  await page.goto(BASE + '/inicio');
+  await page.waitForSelector('a.module:has-text("Comida")');
+
   // 2) Comida: menú y objetivo
   await page.locator('a.module', { hasText: 'Comida' }).click();
   await page.waitForSelector('text=Aún no hay nada registrado');
-  check('Comida: menú inferior Hoy · Plan · Registrar · Recetas · Yo', (await tabs(page)).join() === 'Hoy,Plan,Registrar,Recetas,Yo', (await tabs(page)).join(' · '));
+  check('el módulo Comida tiñe la app con su color (data-module)', (await page.evaluate(() => document.querySelector('app-root')?.getAttribute('data-module'))) === 'food');
+  check('Comida: menú inferior Hoy · Alimentos · Registrar · Plan · Recetas', (await tabs(page)).join() === 'Hoy,Alimentos,Registrar,Plan,Recetas', (await tabs(page)).join(' · '));
   check('Hoy sin perfil invita a completarlo (sin cifras inventadas)', /perfil nutricional/.test(await page.locator('main').innerText()));
   await page.getByRole('link', { name: 'perfil nutricional' }).click();
   await page.waitForSelector('h1:has-text("Perfil nutricional")');
@@ -98,7 +164,7 @@ try {
   await page.waitForSelector('a.module:has-text("Trabajo")');
   await page.locator('a.module', { hasText: 'Trabajo' }).click();
   await page.waitForSelector('text=Aún no has registrado nada hoy');
-  check('Trabajo: menú inferior Hoy · Calendario · Registrar · Historial · Yo', (await tabs(page)).join() === 'Hoy,Calendario,Registrar,Historial,Yo', (await tabs(page)).join(' · '));
+  check('Trabajo: menú inferior Hoy · Calendario · Registrar · Historial', (await tabs(page)).join() === 'Hoy,Calendario,Registrar,Historial', (await tabs(page)).join(' · '));
   check('Trabajo · Hoy: resumen del día vacío', /Aún no has registrado nada hoy/.test(await page.locator('main').innerText()));
 
   // 5) Registrar un resumen y un texto largo
@@ -163,7 +229,7 @@ try {
   check('borrar un registro lo quita del historial', true);
 
   // 8) Yo de Trabajo: ajustes y cuenta, sin lo de Comida
-  await tab(page, 'Yo');
+  await page.locator('a.me-link').click();
   await page.waitForSelector('h2:has-text("Tu cuenta")');
   const yo = await page.locator('main').innerText();
   check('Trabajo · Yo: cuenta y datos, sin el perfil nutricional', /Tu cuenta/.test(yo) && /Tus datos/.test(yo) && !/Perfil nutricional/.test(yo));
@@ -176,6 +242,7 @@ try {
   check('sin errores en la consola del navegador', real.length === 0, real.join(' | ').slice(0, 200));
 } catch (e) {
   check('el recorrido se completa sin excepciones', false, String(e).split('\n')[0]);
+  console.log('URL:', page.url(), '| errores de consola:', consoleErrors.join(' | ').slice(0, 400), '| red:', netLog.slice(-8).join(' ; '));
   await page.screenshot({ path: `${SHOTS}/m-error.png` }).catch(() => {});
 } finally {
   await browser.close();

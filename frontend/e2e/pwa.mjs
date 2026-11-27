@@ -23,8 +23,7 @@ async function enterFood(page) {
   await page.waitForSelector('text=Aún no hay nada registrado');
 }
 async function goFoods(page) {
-  await page.locator('nav.tabbar a', { hasText: 'Yo' }).click();
-  await page.getByRole('link', { name: 'Mis alimentos' }).click();
+  await page.locator('nav.tabbar a', { hasText: 'Alimentos' }).click();
   await page.waitForSelector('h1:has-text("Alimentos")');
 }
 
@@ -35,7 +34,7 @@ const consoleErrors = [];
 const wakePings = [];
 page.on('console', (m) => { if (m.type() === 'error') consoleErrors.push(m.text()); });
 page.on('pageerror', (e) => consoleErrors.push(String(e)));
-page.on('request', (r) => { if (r.url().includes('/q/health/live')) wakePings.push(r.url()); });
+page.on('request', (r) => { if (r.url().includes('/api/v1/status')) wakePings.push(r.url()); });
 
 try {
   // 1) Manifiesto
@@ -43,7 +42,7 @@ try {
   const m = await mres.json();
   check('manifiesto con tipo MIME correcto', (mres.headers()['content-type'] ?? '').includes('manifest+json'));
   check('manifiesto: pantalla completa (standalone), id, ámbito y arranque', m.display === 'standalone' && m.id === '/' && m.scope === '/' && m.start_url.startsWith('/'), `${m.display} · ${m.start_url}`);
-  check('manifiesto: nombre, colores e idioma', m.name.includes('FITona') && m.short_name === 'FITona' && m.theme_color === '#b34a24' && m.background_color === '#fbf6ef' && m.lang === 'es');
+  check('manifiesto: nombre, colores e idioma', m.name.includes('FITona') && m.short_name === 'FITona' && m.theme_color === '#fff7e8' && m.background_color === '#fff7e8' && m.lang === 'es');
   const any = m.icons.filter((i) => i.purpose === 'any').map((i) => i.sizes), mask = m.icons.filter((i) => i.purpose === 'maskable').map((i) => i.sizes);
   check('manifiesto: iconos any (48→512) y maskable (192 y 512)', any.length >= 8 && any.includes('192x192') && any.includes('512x512') && mask.includes('192x192') && mask.includes('512x512'), `${any.length} any · ${mask.length} maskable`);
   await page.goto(`${BASE}/entrar`);
@@ -75,7 +74,8 @@ try {
   const cdp = await ctx.newCDPSession(page);
   const inst = await cdp.send('Page.getInstallabilityErrors');
   check('Chrome la considera instalable (0 errores de instalabilidad)', inst.installabilityErrors.length === 0, JSON.stringify(inst.installabilityErrors.map((e) => e.errorId)));
-  check('al abrir la app se «despierta» el backend en segundo plano', wakePings.length >= 1, wakePings[0] ?? 'sin ping');
+  const pingsBefore = wakePings.length; await sleep(6000);
+  check('al abrir la app se despierta servidor y base de datos con una consulta de estado, sin sondeos periódicos', wakePings.length >= 1 && wakePings.length === pingsBefore, wakePings[0] ?? 'sin ping');
 
   // 4) Cuenta y sesión persistente
   const mail = `pwa${Date.now()}@example.com`;
@@ -124,18 +124,21 @@ try {
 
   // 6) Servidor despertando
   // context.route (no page.route): con un service worker activo, page.route no ve las peticiones
-  await ctx.route('**/api/v1/foods?**', async (route) => { await sleep(6500); await route.continue(); });
+  await ctx.route('**/api/v1/status', async (route) => { await sleep(5000); await route.continue(); });
+  await ctx.route('**/api/v1/foods?**', async (route) => { await sleep(5000); await route.continue(); });
+  await page.reload(); await page.waitForSelector('nav.tabbar');
   await goFoods(page);
   await page.getByLabel('Buscar').fill('pera');
-  await page.waitForSelector('.notice:has-text("despertando")', { timeout: 9000 });
-  check('si el servidor tarda, aviso amable «se está despertando»', true);
+  await page.waitForSelector('.conn[data-notice="waking"]', { timeout: 9000 });
+  check('si el servidor tarda, aviso real con Fiona «despertando al servidor» (no bloquea la app)', (await page.locator('nav.tabbar').count()) === 1);
   await page.waitForSelector('.result', { timeout: 20000 });
-  check('el aviso desaparece cuando el servidor responde', (await page.locator('.notice:has-text("despertando")').count()) === 0);
-  await ctx.unroute('**/api/v1/foods?**');
+  await page.waitForFunction(() => !document.querySelector('.conn'), null, { timeout: 15000 });
+  check('el aviso desaparece cuando el servidor responde', true);
+  await ctx.unroute('**/api/v1/status'); await ctx.unroute('**/api/v1/foods?**');
 
   // 7) Sin conexión
   await ctx.setOffline(true);
-  await page.waitForSelector('.notice.err:has-text("Sin conexión a Internet")');
+  await page.waitForSelector('.conn[data-notice="offline"]');
   check('sin conexión: aviso claro y la app sigue abierta', true);
   await page.getByLabel('Buscar').fill('plátano'); await sleep(1500);
   await page.waitForSelector('main .error:has-text("Sin conexión a Internet")', { timeout: 15000 });
@@ -144,7 +147,7 @@ try {
   await page.waitForSelector('nav.tabbar', { timeout: 20000 });
   check('sin conexión: la app se abre igualmente desde el service worker (sesión conservada)', true);
   await ctx.setOffline(false);
-  await page.waitForFunction(() => !document.querySelector('.notice.err'), null, { timeout: 15000 });
+  await page.waitForFunction(() => !document.querySelector('.conn'), null, { timeout: 15000 });
   check('al volver la conexión desaparece el aviso y todo funciona', true);
 
   // 8) Actualizaciones
@@ -163,7 +166,7 @@ try {
   }
 
   // 9) Cierre de sesión
-  await page.locator('nav.tabbar a', { hasText: 'Yo' }).click();
+  await page.locator('a.me-link').click();
   await page.getByRole('button', { name: 'Cerrar sesión' }).click();
   await page.waitForSelector('h1:has-text("Entrar")');
   check('cerrar sesión borra el token del dispositivo', (await page.evaluate(() => localStorage.getItem('fitona.session'))) === null);
@@ -174,7 +177,7 @@ try {
   await ip.goto(`${BASE}/entrar`); await ip.waitForSelector('h1:has-text("Entrar")');
   await ip.getByLabel('Correo electrónico').fill(mail); await ip.getByLabel('Contraseña').fill('una-frase-larga-segura');
   await ip.getByRole('button', { name: 'Entrar', exact: true }).click(); await ip.locator('a.module', { hasText: 'Comida' }).click({ timeout: 120000 }); await ip.waitForSelector('nav.tabbar');
-  await ip.locator('nav.tabbar a', { hasText: 'Yo' }).click();
+  await ip.locator('a.me-link').click();
   await ip.waitForSelector('text=Añadir a pantalla de inicio');
   check('en iPhone se explican los pasos «Compartir → Añadir a pantalla de inicio»', true);
   await ip.screenshot({ path: `${SHOTS}/pwa-iphone-yo.png` });
