@@ -13,9 +13,9 @@ services:
       - { key: FITONA_DB_KIND, value: postgresql }
       - { key: FITONA_DB_INIT_SQL, value: SELECT 1 }
       - { key: FITONA_DB_POOL_MAX, value: "3" }
-      - { key: FITONA_PBKDF2_ITERATIONS, value: "100000" }
+      - { key: FITONA_REGISTRATION_OPEN, value: "true" }   # ponlo en false cuando hayas creado tus cuentas
       - { key: FITONA_CORS_ENABLED, value: "true" }
-      - { key: JAVA_OPTS, value: "-Xms32m -Xmx256m -XX:MaxMetaspaceSize=128m -Xss512k -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -XX:CICompilerCount=1 -XX:+ExitOnOutOfMemoryError" }
+      - { key: JAVA_OPTS, value: "-Xms32m -Xmx256m -XX:MaxMetaspaceSize=128m -Xss512k -XX:+UseSerialGC -XX:+ExitOnOutOfMemoryError" }
       - { key: FITONA_DB_URL, sync: false }          # jdbc:postgresql://HOST/DB?sslmode=require
       - { key: FITONA_DB_USER, sync: false }         # fitona_app
       - { key: FITONA_DB_PASSWORD, sync: false }

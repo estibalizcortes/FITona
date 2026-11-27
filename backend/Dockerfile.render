@@ -23,6 +23,7 @@ COPY --from=build --chown=fitona /src/backend/app/target/quarkus-app/ /app/
 USER fitona
 # Render inyecta PORT (por defecto 10000); la app escucha en ese puerto (quarkus.http.port=${PORT:8080}).
 EXPOSE 10000
-# Memoria: heap máx. 256 MB (el resto: metaspace, hilos, buffers) y un solo recolector/compilador ligeros.
-ENV JAVA_OPTS="-Xms32m -Xmx256m -XX:MaxMetaspaceSize=128m -Xss512k -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -XX:CICompilerCount=1 -XX:+ExitOnOutOfMemoryError"
+# Memoria: heap máx. 256 MB (resto: metaspace, hilos, buffers) y recolector serie. NO limitar el compilador a C1: con C2 el hash
+# de contraseñas (PBKDF2 600000) tarda ~3 s en vez de ~19 s con 0,1 CPU (medido).
+ENV JAVA_OPTS="-Xms32m -Xmx256m -XX:MaxMetaspaceSize=128m -Xss512k -XX:+UseSerialGC -XX:+ExitOnOutOfMemoryError"
 ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar /app/quarkus-run.jar"]

@@ -8,12 +8,18 @@ import es.fitona.app.security.PasswordHasher;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import es.fitona.app.infra.Db;
+import es.fitona.app.infra.Ids;
+import jakarta.inject.Inject;
 import java.util.UUID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 @QuarkusTest
 class AuthTest {
+
+    @Inject
+    Db db;
 
     private static Response post(String path, String body) {
         return given().contentType(ContentType.JSON).body(body).post(path);
@@ -79,5 +85,27 @@ class AuthTest {
             post("/api/v1/auth/login", "{\"email\":\"" + mail + "\",\"password\":\"mala-clave-larga-" + i + "\"}").then().statusCode(401);
         }
         post("/api/v1/auth/login", "{\"email\":\"" + mail + "\",\"password\":\"clave-muy-larga-1\"}").then().statusCode(429);
+    }
+
+    @Test
+    void oldHashesAreUpgradedOnLoginAndTheIterationFloorHolds() {
+        String mail = "rehash" + UUID.randomUUID() + "@example.com";
+        String token = post("/api/v1/auth/register", reg(mail, "clave-muy-larga-1", true, true)).then().statusCode(201)
+                .extract().path("token");
+        UUID uid = UUID.fromString(given().header("Authorization", "Bearer " + token).get("/api/v1/auth/me").path("userId"));
+        // un hash «antiguo» con el mínimo de iteraciones
+        db.update("UPDATE USER_CREDENTIALS SET PASSWORD_HASH = ? WHERE USER_ID = ?", ps -> {
+            ps.setString(1, PasswordHasher.hash("clave-muy-larga-1", PasswordHasher.MIN_ITERATIONS));
+            ps.setBytes(2, Ids.toRaw(uid));
+        });
+        String before = db.queryOne("SELECT PASSWORD_HASH FROM USER_CREDENTIALS WHERE USER_ID = ?", ps -> ps.setBytes(1, Ids.toRaw(uid)), rs -> rs.getString(1));
+        Assertions.assertTrue(PasswordHasher.needsRehash(before));
+        // una contraseña incorrecta NO renueva el hash; la correcta sí, y sigue valiendo
+        post("/api/v1/auth/login", "{\"email\":\"" + mail + "\",\"password\":\"otra-clave-larga-1\"}").then().statusCode(401);
+        post("/api/v1/auth/login", "{\"email\":\"" + mail + "\",\"password\":\"clave-muy-larga-1\"}").then().statusCode(200);
+        String after = db.queryOne("SELECT PASSWORD_HASH FROM USER_CREDENTIALS WHERE USER_ID = ?", ps -> ps.setBytes(1, Ids.toRaw(uid)), rs -> rs.getString(1));
+        Assertions.assertFalse(PasswordHasher.needsRehash(after), "el hash debe quedar con las iteraciones actuales");
+        Assertions.assertTrue(PasswordHasher.verify("clave-muy-larga-1", after));
+        Assertions.assertTrue(PasswordHasher.MIN_ITERATIONS >= 100_000, "el suelo de iteraciones no debe bajar de 100000");
     }
 }

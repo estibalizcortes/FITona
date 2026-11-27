@@ -47,6 +47,20 @@ public class AuthService {
     @Inject
     Db db;
 
+    private static final org.jboss.logging.Logger LOG = org.jboss.logging.Logger.getLogger(AuthService.class);
+    private static final int MAX_TRACKED_EMAILS = 5000;
+
+    @jakarta.annotation.PostConstruct
+    void init() {
+        PasswordHasher.warnIfBelowRecommended(LOG);
+    }
+
+    /** Interruptor para cerrar el registro cuando ya has creado las cuentas que necesitas (FITONA_REGISTRATION_OPEN=false). */
+    static boolean registrationOpen() {
+        return org.eclipse.microprofile.config.ConfigProvider.getConfig()
+                .getOptionalValue("fitona.auth.registration-open", Boolean.class).orElse(true);
+    }
+
     // shortcut: contador en memoria (una sola instancia del backend); con varias instancias, moverlo a la BD.
     private final ConcurrentHashMap<String, Deque<Instant>> failures = new ConcurrentHashMap<>();
 
@@ -60,6 +74,7 @@ public class AuthService {
 
     @Transactional
     public Session register(String emailRaw, String password, boolean adult, boolean healthConsent) {
+        if (!registrationOpen()) throw new AuthException(403, "El registro de cuentas nuevas está cerrado.");
         String email = normalizeEmail(emailRaw);
         if (password == null || password.length() < 4 || password.length() > 128) {
             throw new AuthException(400, "La contraseña debe tener entre 4 y 128 caracteres.");
@@ -93,25 +108,49 @@ public class AuthService {
 
     public Session login(String emailRaw, String password) {
         String email = normalizeEmail(emailRaw);
-        Deque<Instant> recent = failures.computeIfAbsent(email, k -> new ArrayDeque<>());
-        synchronized (recent) {
-            Instant cutoff = Instant.now().minus(WINDOW);
-            while (!recent.isEmpty() && recent.peekFirst().isBefore(cutoff)) recent.pollFirst();
-            if (recent.size() >= MAX_FAILURES) {
-                throw new AuthException(429, "Demasiados intentos. Espera unos 15 minutos y vuelve a probar.");
+        Deque<Instant> known = failures.get(email);
+        if (known != null) {
+            synchronized (known) {
+                Instant cutoff = Instant.now().minus(WINDOW);
+                while (!known.isEmpty() && known.peekFirst().isBefore(cutoff)) known.pollFirst();
+                if (known.size() >= MAX_FAILURES) {
+                    throw new AuthException(429, "Demasiados intentos. Espera unos 15 minutos y vuelve a probar.");
+                }
             }
         }
         Object[] row = db.queryOne("SELECT USER_ID, PASSWORD_HASH FROM USER_CREDENTIALS WHERE EMAIL_NORM = ?",
                 ps -> ps.setString(1, email), rs -> new Object[] {Ids.fromRaw(rs.getBytes(1)), rs.getString(2)});
         boolean ok = PasswordHasher.verify(password == null ? "" : password, row == null ? Dummy.HASH : (String) row[1]);
         if (row == null || !ok) {
-            synchronized (recent) {
-                recent.addLast(Instant.now());
-            }
+            recordFailure(email);
             throw new AuthException(401, "Correo o contraseña incorrectos.");
         }
         failures.remove(email);
+        if (PasswordHasher.needsRehash((String) row[1])) {
+            UUID uid = (UUID) row[0];
+            db.update("UPDATE USER_CREDENTIALS SET PASSWORD_HASH = ? WHERE USER_ID = ?", ps -> {
+                ps.setString(1, PasswordHasher.hash(password));
+                ps.setBytes(2, Ids.toRaw(uid));
+            });
+        }
         return openSession((UUID) row[0], email);
+    }
+
+    /** Solo se guardan correos con fallos y con tope: correos inventados no pueden hacer crecer la memoria sin límite. */
+    private void recordFailure(String email) {
+        if (failures.size() >= MAX_TRACKED_EMAILS) {
+            Instant cutoff = Instant.now().minus(WINDOW);
+            failures.values().removeIf(d -> {
+                synchronized (d) {
+                    return d.isEmpty() || d.peekLast().isBefore(cutoff);
+                }
+            });
+            if (failures.size() >= MAX_TRACKED_EMAILS) return; // saturado: no se registra más (el login sigue funcionando)
+        }
+        Deque<Instant> d = failures.computeIfAbsent(email, k -> new ArrayDeque<>());
+        synchronized (d) {
+            d.addLast(Instant.now());
+        }
     }
 
     /** Persona dueña de un token vigente, o null. */
