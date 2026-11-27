@@ -61,7 +61,7 @@ export class LoginPage {
         ? await this.api.register({ email: this.email(), password: this.password(), adult: this.adult(), healthConsent: this.consent() })
         : await this.api.login(this.email(), this.password());
       this.session.open(s.token, s.email);
-      await this.router.navigate(['/hoy']);
+      await this.router.navigate(['/inicio']);
     } catch (e) { this.error.set(errorMessage(e)); } finally { this.busy.set(false); }
   }
 }

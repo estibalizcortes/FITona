@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit, inject, input, signal } fro
 import { RouterLink } from '@angular/router';
 import { Api, errorMessage } from '../core/api';
 import { SLOT_NAMES, shiftDate, todayIso, unitLabel } from '../core/format';
-import { Diary, DiaryEntry, Unit } from '../core/models';
+import { Diary, DiaryEntry, NutritionProfileResponse, Unit } from '../core/models';
 import { Prefs } from '../core/prefs';
 import { TotalsView } from '../shared/totals-view';
 
@@ -22,6 +22,18 @@ import { TotalsView } from '../shared/totals-view';
       </div>
 
       @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
+
+      @if (prefs.mode() !== 'SIMPLE' && goalLoaded()) {
+        @if (goal(); as g) {
+          <article class="card goal" aria-label="Objetivo del día">
+            <div class="between"><h2>Hoy ≈ {{ eaten() }} kcal</h2><span class="muted">objetivo ≈ {{ g.target.target }} kcal</span></div>
+            <div class="bar" role="progressbar" aria-valuemin="0" [attr.aria-valuemax]="g.target.target" [attr.aria-valuenow]="eaten()"><i [style.width.%]="pct(g.target.target)"></i></div>
+            <p class="muted small">{{ remainingText(g.target.target) }}</p>
+          </article>
+        } @else {
+          <article class="card goal"><p>Para ver tu objetivo diario, completa tu <a routerLink="/yo/perfil">perfil nutricional</a>.</p></article>
+        }
+      }
 
       @if (diary(); as d) {
         @if (d.entries.length === 0) {
@@ -73,6 +85,8 @@ export class DiaryPage implements OnInit {
   readonly dateParam = input<string | undefined>(undefined, { alias: 'date' });
   readonly date = signal(todayIso());
   readonly diary = signal<Diary | null>(null);
+  protected readonly goal = signal<NutritionProfileResponse | null>(null);
+  protected readonly goalLoaded = signal(false);
   readonly error = signal('');
   private units: Unit[] = [];
 
@@ -80,6 +94,19 @@ export class DiaryPage implements OnInit {
     if (this.dateParam()) this.date.set(this.dateParam()!);
     void this.api.reference().then((r) => { this.units = r.units; this.diary.update((d) => (d ? { ...d } : d)); }).catch(() => undefined);
     void this.load();
+    this.api.nutritionProfile().then((g) => this.goal.set(g)).catch(() => undefined).finally(() => this.goalLoaded.set(true));
+  }
+
+  /** kcal del día (si hay algo desconocido es un mínimo; el total completo se ve más abajo). */
+  protected eaten(): number {
+    const e = this.diary()?.totals.nutrients['energyKcal'];
+    return Math.round(e?.value ?? 0);
+  }
+  protected pct(target: number): number { return Math.min(100, Math.round((this.eaten() / target) * 100)); }
+  /** Texto neutro: ni «te has pasado» ni colores de alarma; es solo una referencia. */
+  protected remainingText(target: number): string {
+    const left = target - this.eaten();
+    return left >= 0 ? `Te quedan ≈ ${left} kcal como referencia.` : `Has superado la referencia en ≈ ${-left} kcal: es solo orientativa, sin nada que compensar.`;
   }
 
   protected unitName(code: string | null, qty: number | null): string { return unitLabel(this.units, code, qty); }

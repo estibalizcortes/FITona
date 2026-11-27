@@ -1,20 +1,34 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
 import { Api, errorMessage } from '../core/api';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Install } from '../core/install';
 import { Session } from '../core/session';
 
 @Component({
   selector: 'app-me-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RouterLink],
   template: `
     <section>
       <h1>Yo</h1>
+
+      @if (module() !== 'work') {
+      <article class="card">
+        <h2>Perfil nutricional</h2>
+        <p class="muted">Tus datos (altura, peso, actividad…) para calcular tu objetivo calórico orientativo.</p>
+        <div class="actions"><a class="btn primary" routerLink="/yo/perfil">Abrir mi perfil nutricional</a> <a class="btn" routerLink="/alimentos">Mis alimentos</a></div>
+      </article>
 
       <article class="card">
         <h2>Modo de uso</h2>
         <p>Arriba a la derecha puedes cambiar entre <strong>Sencillo</strong> (sin cifras), <strong>Equilibrado</strong>
           (energía aproximada) y <strong>Avanzado</strong> (energía y macros). Cambiar de modo no borra ni oculta datos guardados.</p>
+      </article>
+      }
+
+      <article class="card">
+        <h2>Módulos</h2>
+        <div class="actions"><a class="btn" routerLink="/inicio">Cambiar de módulo</a></div>
       </article>
 
       <article class="card">
@@ -58,6 +72,8 @@ import { Session } from '../core/session';
 })
 export class MePage {
   private readonly api = inject(Api);
+  /** 'work' desde /trabajo/yo (route data): oculta lo que es solo del módulo Comida. */
+  readonly module = input<string | undefined>();
   protected readonly session = inject(Session);
   protected readonly install = inject(Install);
   private readonly router = inject(Router);

@@ -34,6 +34,10 @@
    "La cebolla: sofríela con un chorrito de aceite en una sartén, o ponla junto a las patatas en la freidora de aire.",
    "Bate los huevos crudos enteros (o quita parte de las yemas si lo prefieres) y mézclalos con las patatas y la cebolla.",
    "Cuaja la mezcla en la sartén y dale la vuelta con cuidado (con un plato) hasta que no quede huevo líquido."
+  ],
+  "meals": [
+   "LUNCH",
+   "DINNER"
   ]
  },
  {
@@ -74,6 +78,10 @@
    "Pon el yogur en un bol.",
    "Añade los copos de avena, el chocolate negro picado y las semillas.",
    "Mezcla o come por capas."
+  ],
+  "meals": [
+   "BREAKFAST",
+   "SNACK"
   ]
  },
  {
@@ -101,6 +109,10 @@
    "Tapa y deja reposar en un sitio oscuro y sin moverlo, de 24 a 48 horas. Pasado ese tiempo tendrás yogur natural.",
    "Para yogur griego: ponlo sobre una tela fina (o gasa) sobre un colador y déjalo en la nevera, tapado, otras 24 a 48 horas hasta que suelte el suero.",
    "Tira el suero. Lo que queda es el yogur griego. Si no separas el suero, es yogur natural. Guárdalo en la nevera."
+  ],
+  "meals": [
+   "SNACK",
+   "BREAKFAST"
   ]
  },
  {
@@ -134,6 +146,10 @@
    "Cuece la pasta siguiendo las instrucciones del paquete.",
    "Sofríe la cebolla picada con el aceite y añade el tomate hasta que se haga la salsa.",
    "Mezcla la pasta escurrida con la salsa."
+  ],
+  "meals": [
+   "LUNCH",
+   "DINNER"
   ]
  },
  {
@@ -162,6 +178,10 @@
    "Cuece los macarrones siguiendo el paquete.",
    "Calienta el tomate frito y mezcla el atún escurrido.",
    "Mezcla con la pasta escurrida."
+  ],
+  "meals": [
+   "LUNCH",
+   "DINNER"
   ]
  },
  {
@@ -206,6 +226,10 @@
    "Añade la carne picada y cocínala hasta que no quede rosada por dentro.",
    "Agrega el tomate y cocina a fuego suave.",
    "Cuece la pasta y mézclala con la salsa."
+  ],
+  "meals": [
+   "LUNCH",
+   "DINNER"
   ]
  },
  {
@@ -249,6 +273,10 @@
    "Cuece los huevos hasta que estén duros y déjalos enfriar.",
    "Trocea la lechuga, el tomate y la cebolla.",
    "Añade el atún escurrido y el huevo troceado y aliña con el aceite."
+  ],
+  "meals": [
+   "LUNCH",
+   "DINNER"
   ]
  },
  {
@@ -287,6 +315,10 @@
    "Trocea el pollo y dóralo en la cazuela con el aceite hasta que esté bien hecho por dentro.",
    "Añade el pimiento y el tomate troceados y sofríe.",
    "Incorpora el arroz y el caldo o agua y cuécelo hasta que esté tierno."
+  ],
+  "meals": [
+   "LUNCH",
+   "DINNER"
   ]
  },
  {
@@ -330,6 +362,10 @@
    "Sofríe las verduras troceadas con el aceite.",
    "Añade el arroz y rehógalo un minuto.",
    "Agrega agua o caldo y cuece hasta que el arroz esté tierno."
+  ],
+  "meals": [
+   "LUNCH",
+   "DINNER"
   ]
  },
  {
@@ -363,6 +399,10 @@
    "Cuece el arroz.",
    "Fríe o haz a la plancha los huevos con un chorrito de aceite hasta que la clara cuaje.",
    "Sirve el arroz con el tomate y el huevo encima."
+  ],
+  "meals": [
+   "LUNCH",
+   "DINNER"
   ]
  },
  {
@@ -401,6 +441,10 @@
    "Sofríe la cebolla y la zanahoria picadas con el aceite.",
    "Añade la patata troceada, las lentejas cocidas y agua o caldo.",
    "Cuece hasta que la patata esté tierna."
+  ],
+  "meals": [
+   "LUNCH",
+   "DINNER"
   ]
  },
  {
@@ -439,6 +483,10 @@
    "Escurre y enjuaga las lentejas cocidas.",
    "Pica el tomate y el pimiento y mézclalos con las lentejas y el atún.",
    "Aliña con el aceite."
+  ],
+  "meals": [
+   "LUNCH",
+   "DINNER"
   ]
  },
  {
@@ -472,6 +520,10 @@
    "Dora los ajos laminados en el aceite.",
    "Rehoga las espinacas.",
    "Añade los garbanzos cocidos y caliéntalo todo junto."
+  ],
+  "meals": [
+   "LUNCH",
+   "DINNER"
   ]
  },
  {
@@ -515,6 +567,10 @@
    "Cuece el huevo hasta que esté duro.",
    "Escurre los garbanzos y mézclalos con el tomate y la cebolla picados, el atún y el huevo troceado.",
    "Aliña con el aceite."
+  ],
+  "meals": [
+   "LUNCH",
+   "DINNER"
   ]
  },
  {
@@ -543,6 +599,9 @@
    "Escurre los garbanzos (guarda un poco del líquido).",
    "Tritura con el ajo y el aceite, añadiendo líquido hasta la textura que quieras.",
    "Sazona al gusto."
+  ],
+  "meals": [
+   "SNACK"
   ]
  },
  {
@@ -575,6 +634,9 @@
   "steps": [
    "Trocea las verduras y cuécelas en agua hasta que estén tiernas.",
    "Tritúralas con el aceite y sal al gusto."
+  ],
+  "meals": [
+   "DINNER"
   ]
  },
  {
@@ -607,6 +669,9 @@
   "steps": [
    "Trocea las verduras y cuécelas en agua o caldo hasta que estén tiernas.",
    "Tritura con el aceite y sal al gusto."
+  ],
+  "meals": [
+   "DINNER"
   ]
  },
  {
@@ -640,6 +705,10 @@
    "Calienta el caldo con la zanahoria troceada.",
    "Añade el pollo en trozos pequeños y cuécelo hasta que esté hecho por dentro.",
    "Incorpora los fideos y cuece según el paquete."
+  ],
+  "meals": [
+   "DINNER",
+   "LUNCH"
   ]
  },
  {
@@ -682,6 +751,10 @@
   "steps": [
    "Trocea las verduras y tritúralas con el ajo, el aceite, el vinagre y sal.",
    "Cuela si quieres una textura fina y enfría en la nevera antes de servir."
+  ],
+  "meals": [
+   "LUNCH",
+   "DINNER"
   ]
  },
  {
@@ -726,6 +799,10 @@
    "Tritura los tomates con el pan remojado, el ajo, el aceite y sal hasta que quede cremoso.",
    "Enfría en la nevera.",
    "Sirve con el jamón y el huevo cocido picados por encima."
+  ],
+  "meals": [
+   "LUNCH",
+   "DINNER"
   ]
  },
  {
@@ -769,6 +846,10 @@
    "Cuece las patatas, la zanahoria y los guisantes y déjalos enfriar.",
    "Trocea todo junto con el huevo cocido.",
    "Mezcla con el atún y la mayonesa y enfría en la nevera."
+  ],
+  "meals": [
+   "LUNCH",
+   "DINNER"
   ]
  },
  {
@@ -812,6 +893,10 @@
    "Sofríe la cebolla, el pimiento y el calabacín troceados con el aceite.",
    "Añade el tomate y cocina hasta que las verduras estén tiernas.",
    "Pon los huevos por encima y cuécelos hasta que la clara cuaje por completo."
+  ],
+  "meals": [
+   "DINNER",
+   "LUNCH"
   ]
  },
  {
@@ -839,6 +924,10 @@
   "steps": [
    "Rehoga las espinacas con el aceite.",
    "Añade los huevos batidos y remueve hasta que cuajen por completo."
+  ],
+  "meals": [
+   "DINNER",
+   "BREAKFAST"
   ]
  },
  {
@@ -861,6 +950,9 @@
   "steps": [
    "Bate los huevos con una pizca de sal.",
    "Cuaja en la sartén con el aceite y dóblala cuando no quede huevo líquido."
+  ],
+  "meals": [
+   "DINNER"
   ]
  },
  {
@@ -893,6 +985,10 @@
   "steps": [
    "Tuesta el pan y úntalo con el aguacate machacado.",
    "Haz el huevo a la plancha con el aceite hasta que la clara cuaje y ponlo encima."
+  ],
+  "meals": [
+   "BREAKFAST",
+   "DINNER"
   ]
  },
  {
@@ -919,6 +1015,10 @@
   ],
   "steps": [
    "Tuesta el pan, úntalo con el tomate rallado y añade el aceite."
+  ],
+  "meals": [
+   "BREAKFAST",
+   "SNACK"
   ]
  },
  {
@@ -950,6 +1050,10 @@
   ],
   "steps": [
    "Tuesta el pan, añade el tomate rallado, el jamón y un chorrito de aceite."
+  ],
+  "meals": [
+   "BREAKFAST",
+   "SNACK"
   ]
  },
  {
@@ -976,6 +1080,10 @@
   ],
   "steps": [
    "Tuesta el pan, úntalo con la crema de cacahuete y añade el plátano en rodajas."
+  ],
+  "meals": [
+   "BREAKFAST",
+   "SNACK"
   ]
  },
  {
@@ -1003,6 +1111,9 @@
   "steps": [
    "Calienta la leche con la avena removiendo.",
    "Añade el plátano en rodajas."
+  ],
+  "meals": [
+   "BREAKFAST"
   ]
  },
  {
@@ -1035,6 +1146,9 @@
   "steps": [
    "Calienta la leche con la avena removiendo hasta que espese.",
    "Añade la manzana troceada y la canela."
+  ],
+  "meals": [
+   "BREAKFAST"
   ]
  },
  {
@@ -1062,6 +1176,9 @@
   "steps": [
    "Machaca el plátano y mézclalo con el huevo y la avena.",
    "Cocina pequeñas porciones en una sartén antiadherente por ambos lados hasta que el huevo esté cuajado."
+  ],
+  "meals": [
+   "BREAKFAST"
   ]
  },
  {
@@ -1088,6 +1205,10 @@
   ],
   "steps": [
    "Pon el yogur en un cuenco con las fresas troceadas y las nueces por encima."
+  ],
+  "meals": [
+   "BREAKFAST",
+   "SNACK"
   ]
  },
  {
@@ -1114,6 +1235,10 @@
   ],
   "steps": [
    "Tritura todo hasta que quede cremoso y sirve frío."
+  ],
+  "meals": [
+   "BREAKFAST",
+   "SNACK"
   ]
  },
  {
@@ -1151,6 +1276,10 @@
   "steps": [
    "Pela y trocea la fruta.",
    "Mezcla y sirve fría."
+  ],
+  "meals": [
+   "SNACK",
+   "BREAKFAST"
   ]
  },
  {
@@ -1178,6 +1307,10 @@
   "steps": [
    "Cocina el salmón a la plancha o en la freidora de aire hasta que esté hecho por dentro.",
    "Sírvelo con la patata cocida."
+  ],
+  "meals": [
+   "LUNCH",
+   "DINNER"
   ]
  },
  {
@@ -1211,6 +1344,10 @@
    "Corta las patatas y la cebolla en láminas y colócalas en una bandeja con el aceite.",
    "Hornea hasta que estén casi tiernas (según tu horno).",
    "Pon la merluza encima y termina de hornear hasta que esté hecha por dentro."
+  ],
+  "meals": [
+   "LUNCH",
+   "DINNER"
   ]
  },
  {
@@ -1238,6 +1375,10 @@
   "steps": [
    "Trocea el pollo y sazónalo.",
    "Dóralo en el aceite con los ajos laminados hasta que esté bien hecho por dentro."
+  ],
+  "meals": [
+   "LUNCH",
+   "DINNER"
   ]
  },
  {
@@ -1276,6 +1417,10 @@
    "Sofríe la cebolla picada con el aceite.",
    "Añade el pollo troceado y el curry y cocina hasta que esté hecho por dentro.",
    "Cuece el arroz y sírvelo con el pollo."
+  ],
+  "meals": [
+   "LUNCH",
+   "DINNER"
   ]
  },
  {
@@ -1319,6 +1464,10 @@
    "Mezcla la carne con el huevo, el pan rallado y el ajo picado y forma bolas.",
    "Dóralas en una sartén.",
    "Sofríe la cebolla, añade el tomate y cuece las albóndigas en la salsa hasta que estén hechas por dentro."
+  ],
+  "meals": [
+   "LUNCH",
+   "DINNER"
   ]
  },
  {
@@ -1351,6 +1500,10 @@
   "steps": [
    "Forma la hamburguesa y cocínala a la plancha por ambos lados hasta que no quede rosada por dentro.",
    "Monta en el pan con la lechuga y el tomate."
+  ],
+  "meals": [
+   "LUNCH",
+   "DINNER"
   ]
  },
  {
@@ -1378,6 +1531,9 @@
   "steps": [
    "Cuece el brócoli al vapor o en agua hasta que esté tierno.",
    "Saltéalo con el ajo laminado y el aceite."
+  ],
+  "meals": [
+   "DINNER"
   ]
  },
  {
@@ -1405,6 +1561,10 @@
   "steps": [
    "Cuece las judías y la patata troceada hasta que estén tiernas.",
    "Escurre y aliña con el aceite."
+  ],
+  "meals": [
+   "DINNER",
+   "LUNCH"
   ]
  },
  {
@@ -1427,6 +1587,11 @@
   "steps": [
    "Lava el boniato y córtalo en trozos con un chorrito de aceite.",
    "Hornea o cocina en la freidora de aire hasta que esté tierno por dentro."
+  ],
+  "meals": [
+   "DINNER",
+   "LUNCH",
+   "SNACK"
   ]
  },
  {
@@ -1464,6 +1629,10 @@
   "steps": [
    "Cuece la pasta, escúrrela y enfríala.",
    "Mezcla con el tomate troceado, el atún y el maíz y aliña con el aceite."
+  ],
+  "meals": [
+   "LUNCH",
+   "DINNER"
   ]
  }
 ]

@@ -3,7 +3,8 @@ import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import {
   CalcResponse, Diary, DiaryEntry, Food, FoodCategory, FoodRequest, FoodResponse, ItemRequest, Recipe, RecipeRequest,
-  RecipeSummary, Reference, TemplateDetail, TemplateSummary,
+  RecipeSummary, Reference, TemplateDetail, TemplateSummary, CalendarDay, NutritionProfile, NutritionProfileResponse, PlanCandidate,
+  PlanChosen, PlanResponse, PlanSlot, WorkEntry, WorkEntryRequest,
 } from './models';
 
 @Injectable({ providedIn: 'root' })
@@ -48,6 +49,32 @@ export class Api {
     return firstValueFrom(this.http.post<{ token: string; email: string }>(`${this.base}/auth/login`, { email, password }));
   }
   logout(): Promise<void> { return firstValueFrom(this.http.post<void>(`${this.base}/auth/logout`, {})); }
+
+  // Módulo Comida
+  nutritionProfile(): Promise<NutritionProfileResponse | null> {
+    return firstValueFrom(this.http.get<NutritionProfileResponse | null>(`${this.base}/nutrition/profile`));
+  }
+  saveNutritionProfile(p: NutritionProfile): Promise<NutritionProfileResponse> {
+    return firstValueFrom(this.http.put<NutritionProfileResponse>(`${this.base}/nutrition/profile`, p));
+  }
+  planOptions(): Promise<PlanCandidate[]> { return firstValueFrom(this.http.get<PlanCandidate[]>(`${this.base}/plan/options`)); }
+  planSuggest(body: { targetKcal?: number | null; date: string; chosen: PlanChosen[] }): Promise<PlanResponse> {
+    return firstValueFrom(this.http.post<PlanResponse>(`${this.base}/plan/suggest`, body));
+  }
+  planLog(body: { id: string; date: string; slot: PlanSlot; kind: 'TEMPLATE' | 'RECIPE'; key?: string | null; recipeId?: string | null; servings: number }): Promise<DiaryEntry> {
+    return firstValueFrom(this.http.post<DiaryEntry>(`${this.base}/plan/log`, body));
+  }
+
+  // Módulo Trabajo
+  workDay(date: string): Promise<WorkEntry[]> { return firstValueFrom(this.http.get<WorkEntry[]>(`${this.base}/work/entries`, { params: { date } })); }
+  workCalendar(month: string): Promise<CalendarDay[]> { return firstValueFrom(this.http.get<CalendarDay[]>(`${this.base}/work/calendar`, { params: { month } })); }
+  workSearch(q: string, kind: string, offset: number, limit = 30): Promise<WorkEntry[]> {
+    return firstValueFrom(this.http.get<WorkEntry[]>(`${this.base}/work/entries/search`, { params: { q, kind, offset, limit } }));
+  }
+  workEntry(id: string): Promise<WorkEntry> { return firstValueFrom(this.http.get<WorkEntry>(`${this.base}/work/entries/${id}`)); }
+  createWorkEntry(r: WorkEntryRequest): Promise<WorkEntry> { return firstValueFrom(this.http.post<WorkEntry>(`${this.base}/work/entries`, r)); }
+  updateWorkEntry(id: string, r: WorkEntryRequest): Promise<WorkEntry> { return firstValueFrom(this.http.put<WorkEntry>(`${this.base}/work/entries/${id}`, r)); }
+  deleteWorkEntry(id: string): Promise<void> { return firstValueFrom(this.http.delete<void>(`${this.base}/work/entries/${id}`)); }
 
   exportData(): Promise<unknown> { return firstValueFrom(this.http.get<unknown>(`${this.base}/me/export`)); }
   deleteAccount(): Promise<void> { return firstValueFrom(this.http.delete<void>(`${this.base}/me`)); }

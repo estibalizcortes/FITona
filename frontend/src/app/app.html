@@ -2,7 +2,8 @@
 <div class="chrome">
 @if (session.token()) {
 <header class="topbar">
-  <a routerLink="/hoy" class="brand" aria-label="FITona, ir a Hoy">FITona</a>
+  <a routerLink="/inicio" class="brand" aria-label="FITona, ir al inicio (módulos)"><img src="icons/icon-48.png" alt="" width="28" height="28" />FITona@if (module() === 'food') { <small>· Comida</small> } @else if (module() === 'work') { <small>· Trabajo</small> }</a>
+  @if (module() === 'food') {
   <label class="mode">
     <span class="sr-only">Modo de uso</span>
     <select [value]="prefs.mode()" (change)="setMode($event)" aria-label="Modo de uso">
@@ -11,6 +12,7 @@
       }
     </select>
   </label>
+  }
 </header>
 }
 @if (status.notice() === 'offline') {
@@ -27,12 +29,20 @@
   <router-outlet />
 </main>
 
-@if (session.token()) {
-<nav class="tabbar" aria-label="Navegación principal">
+@if (module() === 'food') {
+<nav class="tabbar" aria-label="Menú de Comida">
   <a routerLink="/hoy" routerLinkActive="active"><span aria-hidden="true">🍽</span>Hoy</a>
-  <a routerLink="/alimentos" routerLinkActive="active"><span aria-hidden="true">🥕</span>Alimentos</a>
+  <a routerLink="/plan" routerLinkActive="active"><span aria-hidden="true">📋</span>Plan</a>
   <a routerLink="/registrar" routerLinkActive="active" class="add" aria-label="Registrar comida"><span aria-hidden="true">＋</span><b>Registrar</b></a>
   <a routerLink="/recetas" routerLinkActive="active"><span aria-hidden="true">📖</span>Recetas</a>
   <a routerLink="/yo" routerLinkActive="active"><span aria-hidden="true">👤</span>Yo</a>
+</nav>
+} @else if (module() === 'work') {
+<nav class="tabbar" aria-label="Menú de Trabajo">
+  <a routerLink="/trabajo" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"><span aria-hidden="true">🏠</span>Hoy</a>
+  <a routerLink="/trabajo/calendario" routerLinkActive="active"><span aria-hidden="true">🗓</span>Calendario</a>
+  <a routerLink="/trabajo/registrar" routerLinkActive="active" class="add" aria-label="Registrar nota"><span aria-hidden="true">＋</span><b>Registrar</b></a>
+  <a routerLink="/trabajo/historial" routerLinkActive="active"><span aria-hidden="true">🕘</span>Historial</a>
+  <a routerLink="/trabajo/yo" routerLinkActive="active"><span aria-hidden="true">👤</span>Yo</a>
 </nav>
 }

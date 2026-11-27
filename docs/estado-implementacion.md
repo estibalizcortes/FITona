@@ -101,3 +101,9 @@ Corregidos y con prueba: cantidades absurdas (antes 500 al guardar → ahora 400
 - **Implementado y probado en Chromium** (E2E de la PWA 31/31: manifiesto, instalabilidad, CSP, service worker, sin conexión, servidor despertando, actualización y auditoría de cachés; unitarias 19/19; backend 48/48 en Oracle y PostgreSQL; E2E de siempre 25/25). Detalle y limitaciones en `docs/pwa.md`.
 - **No probado en iPhone/Android reales.** Hay que comprobarlo en tu móvil tras el despliegue (instalar, abrir a pantalla completa, probar sin conexión y una actualización).
 
+
+## App modular: Comida y Trabajo (27-nov-2026)
+- **Implementado y probado en local** (backend 60/60 en Oracle y PostgreSQL; unitarias 19/19; E2E de módulos 24/24 y recorrido completo 26/26): pantalla inicial con selector de módulos; **Comida** (Hoy, Plan, Registrar, Recetas, Yo) con perfil nutricional, modos mantenimiento/déficit, objetivo calórico de referencia (Mifflin-St Jeor × actividad + deporte; suelos de seguridad; orientativo, no médico) y «Plan» que propone el resto del día según lo elegido; **Trabajo** (Hoy, Calendario, Registrar, Historial, Yo) con notas, resúmenes y prompts por fecha, búsqueda y calendario. Nueva identidad (Pionus senilis) en iconos PWA.
+- **Migración nueva V015** (`NUTRITION_GOALS`, `WORK_ENTRIES`); también generada para PostgreSQL. **Hay que aplicarla a Neon** (`scripts/dev/db-migrate-neon.ps1`, ahora espera 75 tablas y versión 015) antes de desplegar el backend nuevo.
+- **Criterio «sin culpa»:** el objetivo se muestra como referencia neutra, sin colores de semáforo ni compensación por deporte.
+- **Limitaciones:** el plan propuesto no se guarda (solo se añade al diario al confirmar); la edad se guarda como número (no se actualiza sola); sin disparadores de sincronización en las tablas nuevas; búsqueda de Trabajo sensible a acentos; E2E de la PWA (`e2e/pwa.mjs`) adaptado pero **no reejecutado**; no probado en móviles reales.

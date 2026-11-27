@@ -89,6 +89,15 @@ public class RecipeService {
                 TotalsDto.from(perServing), TotalsDto.from(c.total()));
     }
 
+    public record Preview(NutrientTotals perServing, String completeness) {}
+
+    /** Valor por ración de una receta SIN guardarla (para sugerir menús). */
+    public Preview preview(UUID user, RecipeRequest req) {
+        Computed c = compute(user, req.ingredients().stream().map(i -> new Input(i.variantId(), i.freeText(), i.quantity(),
+                i.unitCode(), i.note())).toList());
+        return new Preview(RecipeCalculator.perServing(c.total(), req.servings()), c.completeness());
+    }
+
     /** Nutrición por ración calculada en este momento con el catálogo vigente (para registrar en el diario). */
     public PerServing perServing(UUID user, UUID recipeId) {
         RecipeRecord r = repo.find(user, recipeId);

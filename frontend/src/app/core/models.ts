@@ -100,3 +100,25 @@ export interface TemplateDetail {
 
 export interface Unit { code: string; kind: string; singular: string; plural: string }
 export interface Reference { units: Unit[]; mealSlots: { code: string; name: string }[] }
+
+// ---------- Módulo Comida: perfil nutricional y plan ----------
+export interface EnergyTargetResult { bmr: number; maintenance: number; target: number; deficit: number; bmi: number; notes: string[] }
+export interface NutritionProfile {
+  sex: 'F' | 'M'; ageYears: number; heightCm: number; weightKg: number; targetWeightKg: number;
+  dailyActivity: 'LOW' | 'MODERATE' | 'HIGH'; jobType: 'DESK' | 'ON_FEET' | 'PHYSICAL'; sportHoursWeek: number;
+  mode: 'MAINTAIN' | 'DEFICIT';
+}
+export interface NutritionProfileResponse extends NutritionProfile { target: EnergyTargetResult }
+
+export type PlanSlot = 'BREAKFAST' | 'LUNCH' | 'SNACK' | 'DINNER';
+export interface PlanCandidate { kind: 'TEMPLATE' | 'RECIPE'; key: string | null; recipeId: string | null; title: string; kcalPerServing: number; meals: PlanSlot[] }
+export interface PlanOption { kind: 'TEMPLATE' | 'RECIPE' | 'FIXED'; key: string | null; recipeId: string | null; title: string; servings: number; kcalPerServing: number; kcal: number }
+export interface PlanMeal { slot: PlanSlot; source: 'CHOSEN' | 'SUGGESTED' | 'SKIPPED'; option: PlanOption | null; alternatives: PlanOption[] }
+export interface PlanResponse { targetKcal: number; chosenKcal: number; totalKcal: number; message: string; meals: PlanMeal[] }
+export interface PlanChosen { slot: PlanSlot; kind: 'TEMPLATE' | 'RECIPE' | 'FIXED'; key?: string | null; recipeId?: string | null; servings?: number; kcal?: number; label?: string }
+
+// ---------- Módulo Trabajo ----------
+export type WorkKind = 'NOTE' | 'SUMMARY' | 'PROMPT';
+export interface WorkEntry { id: string; date: string; kind: WorkKind; title: string | null; body: string; length: number; truncated: boolean; createdAt: string; updatedAt: string }
+export interface WorkEntryRequest { date: string; kind: WorkKind; title: string | null; body: string }
+export interface CalendarDay { date: string; count: number }

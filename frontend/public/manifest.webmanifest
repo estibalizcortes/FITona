@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "FITona · alimentación sin culpa",
+  "name": "FITona · comida y trabajo sin culpa",
   "short_name": "FITona",
-  "description": "Organiza tus comidas, recetas y compra sin culpa.",
+  "description": "Comida: registro, recetas y plan del día. Trabajo: notas, resúmenes y calendario. Todo sin culpa.",
   "lang": "es",
   "dir": "ltr",
   "start_url": "/?source=pwa",
@@ -18,7 +18,7 @@
   "categories": [
     "health",
     "food",
-    "lifestyle"
+    "productivity"
   ],
   "prefer_related_applications": false,
   "icons": [
@@ -109,8 +109,9 @@
       ]
     },
     {
-      "name": "Recetas",
-      "url": "/recetas?source=shortcut",
+      "name": "Plan del día",
+      "short_name": "Plan",
+      "url": "/plan?source=shortcut",
       "icons": [
         {
           "src": "icons/icon-96.png",
@@ -120,8 +121,8 @@
       ]
     },
     {
-      "name": "Hoy",
-      "url": "/hoy?source=shortcut",
+      "name": "Trabajo",
+      "url": "/trabajo?source=shortcut",
       "icons": [
         {
           "src": "icons/icon-96.png",

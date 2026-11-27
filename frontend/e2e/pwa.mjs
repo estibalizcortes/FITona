@@ -17,6 +17,16 @@ function check(name, ok, detail = '') {
   if (!ok) process.exitCode = 1;
 }
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+// Tras entrar se ve el selector de módulos: se abre Comida. «Alimentos» se alcanza desde Yo -> Mis alimentos.
+async function enterFood(page) {
+  await page.locator('a.module', { hasText: 'Comida' }).click({ timeout: 120000 });
+  await page.waitForSelector('text=Aún no hay nada registrado');
+}
+async function goFoods(page) {
+  await page.locator('nav.tabbar a', { hasText: 'Yo' }).click();
+  await page.getByRole('link', { name: 'Mis alimentos' }).click();
+  await page.waitForSelector('h1:has-text("Alimentos")');
+}
 
 const browser = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});
 const ctx = await browser.newContext({ viewport: { width: 400, height: 860 }, locale: 'es-ES', serviceWorkers: 'allow' });
@@ -41,7 +51,7 @@ try {
     const img = new Image(); img.onload = () => res([i.src, `${img.naturalWidth}x${img.naturalHeight}` === i.sizes]); img.onerror = () => res([i.src, false]); img.src = '/' + i.src;
   }))), m.icons);
   check('todos los iconos del manifiesto existen y miden lo que declaran', iconCheck.every(([, ok]) => ok), `${iconCheck.length} iconos`);
-  check('accesos directos del manifiesto (Registrar, Recetas, Hoy)', (m.shortcuts ?? []).length === 3);
+  check('accesos directos del manifiesto (Registrar, Plan, Trabajo)', (m.shortcuts ?? []).length === 3);
 
   // 2) index.html: iOS, zonas seguras, pantalla de arranque
   const html = await (await ctx.request.get(`${BASE}/`)).text();
@@ -75,7 +85,7 @@ try {
   await page.getByLabel('Soy mayor de edad').check();
   await page.getByLabel(/Acepto que FITona guarde/).check();
   await page.getByRole('button', { name: 'Crear cuenta' }).click();
-  await page.waitForSelector('text=Aún no hay nada registrado', { timeout: 120000 });
+  await enterFood(page);
   check('crear cuenta y entrar bajo CSP + service worker (con el backend de otro dominio)', true);
   await page.reload(); await page.waitForSelector('text=Aún no hay nada registrado');
   const sess = await page.evaluate(() => JSON.parse(localStorage.getItem('fitona.session') ?? 'null'));
@@ -86,11 +96,11 @@ try {
   await page.getByLabel('Correo electrónico').fill(mail);
   await page.getByLabel('Contraseña').fill('una-frase-larga-segura');
   await page.getByRole('button', { name: 'Entrar', exact: true }).click();
-  await page.waitForSelector('text=Aún no hay nada registrado', { timeout: 120000 });
+  await enterFood(page);
   const token = await page.evaluate(() => JSON.parse(localStorage.getItem('fitona.session')).token);
 
   // 5) Auditoría de cachés: nada privado
-  await page.locator('nav.tabbar a', { hasText: 'Alimentos' }).click();
+  await goFoods(page);
   await page.getByLabel('Buscar').fill('manzana'); await page.waitForSelector('.result');
   await page.locator('nav.tabbar a', { hasText: 'Recetas' }).click(); await sleep(800);
   const audit = await page.evaluate(async (tok) => {
@@ -115,7 +125,7 @@ try {
   // 6) Servidor despertando
   // context.route (no page.route): con un service worker activo, page.route no ve las peticiones
   await ctx.route('**/api/v1/foods?**', async (route) => { await sleep(6500); await route.continue(); });
-  await page.locator('nav.tabbar a', { hasText: 'Alimentos' }).click();
+  await goFoods(page);
   await page.getByLabel('Buscar').fill('pera');
   await page.waitForSelector('.notice:has-text("despertando")', { timeout: 9000 });
   check('si el servidor tarda, aviso amable «se está despertando»', true);
@@ -163,7 +173,7 @@ try {
   const ip = await iphone.newPage();
   await ip.goto(`${BASE}/entrar`); await ip.waitForSelector('h1:has-text("Entrar")');
   await ip.getByLabel('Correo electrónico').fill(mail); await ip.getByLabel('Contraseña').fill('una-frase-larga-segura');
-  await ip.getByRole('button', { name: 'Entrar', exact: true }).click(); await ip.waitForSelector('nav.tabbar', { timeout: 120000 });
+  await ip.getByRole('button', { name: 'Entrar', exact: true }).click(); await ip.locator('a.module', { hasText: 'Comida' }).click({ timeout: 120000 }); await ip.waitForSelector('nav.tabbar');
   await ip.locator('nav.tabbar a', { hasText: 'Yo' }).click();
   await ip.waitForSelector('text=Añadir a pantalla de inicio');
   check('en iPhone se explican los pasos «Compartir → Añadir a pantalla de inicio»', true);

@@ -35,7 +35,7 @@ def convert(sql: str) -> str:
     if "EXECUTE FUNCTION TRG_SYNC()" in sql:
         sql = SYNC_FN + sql
     sql = re.sub(r"VARCHAR2\((\d+)\s*(?:CHAR|BYTE)?\)", r"VARCHAR(\1)", sql)
-    sql = sql.replace("RAW(16)", "BYTEA").replace("BLOB", "BYTEA")
+    sql = sql.replace("RAW(16)", "BYTEA").replace("BLOB", "BYTEA").replace("CLOB", "TEXT")
     sql = re.sub(r"NUMBER\((\d+),\s*(\d+)\)", r"NUMERIC(\1,\2)", sql)
     sql = re.sub(r"NUMBER\((\d+)\)", lambda m: "BIGINT" if int(m.group(1)) >= 10 else "INTEGER", sql)
     sql = re.sub(r"\bNUMBER\b(?!\w)(?=[ ,\n])", "NUMERIC", sql)

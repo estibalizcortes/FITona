@@ -126,12 +126,12 @@ SELECT (SELECT count(*) FROM information_schema.tables WHERE table_schema = 'pub
        (SELECT max(version) FROM flyway_schema_history WHERE success)
 '@
 $r = (Invoke-Psql $cfg.NEON_OWNER_USER $cfg.NEON_OWNER_PASSWORD $q).Out -split '\|'
-Check 'tablas (72 de FITona + historial de Flyway)' ($r[0] -eq '73') "[$($r[0])]"
+Check 'tablas (74 de FITona + historial de Flyway)' ($r[0] -eq '75') "[$($r[0])]"
 Check 'disparadores (13)' ($r[1] -eq '13') "[$($r[1])]"
 Check 'alimentos del catálogo (576)' ($r[2] -eq '576') "[$($r[2])]"
 Check 'alimentos con datos nutricionales (572)' ($r[3] -eq '572') "[$($r[3])]"
 Check 'categorías (33)' ($r[4] -eq '33') "[$($r[4])]"
-Check 'versión de migración (014)' ($r[5] -eq '014') "[$($r[5])]"
+Check 'versión de migración (015)' ($r[5] -eq '015') "[$($r[5])]"
 $flags = (Invoke-Psql $cfg.NEON_OWNER_USER $cfg.NEON_OWNER_PASSWORD "SELECT rolsuper, rolcreatedb, rolcreaterole, rolbypassrls, pg_has_role('fitona_app','neon_superuser','member') FROM pg_roles WHERE rolname = 'fitona_app'").Out
 Check 'rol fitona_app sin privilegios especiales (superuser, createdb, createrole, bypassrls, neon_superuser = todo f)' ($flags -eq 'f|f|f|f|f') "[$flags]"
 $app = Invoke-Psql 'fitona_app' $cfg.NEON_APP_PASSWORD 'SELECT count(*) FROM foods' -AllowFailure

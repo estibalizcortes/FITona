@@ -4,6 +4,8 @@ import es.fitona.app.api.DiaryDto;
 import es.fitona.app.api.FoodDto;
 import es.fitona.app.api.RecipeDto;
 import es.fitona.app.catalog.FoodService;
+import es.fitona.app.goal.NutritionGoalService;
+import es.fitona.app.work.WorkEntryRepository;
 import es.fitona.app.diary.DiaryRepository;
 import es.fitona.app.diary.DiaryService;
 import es.fitona.app.infra.Db;
@@ -46,6 +48,12 @@ public class AccountResource {
     DiaryRepository diaryRepo;
 
     @Inject
+    NutritionGoalService goals;
+
+    @Inject
+    WorkEntryRepository work;
+
+    @Inject
     Db db;
 
     @GET
@@ -63,6 +71,8 @@ public class AccountResource {
         List<DiaryDto.EntryDto> entries = new ArrayList<>();
         for (UUID id : diaryRepo.allEntryIds(u)) entries.add(diary.get(u, id));
         out.put("diaryEntries", entries);
+        out.put("nutritionProfile", goals.get(u));
+        out.put("workEntries", work.all(u));
         return out;
     }
 
