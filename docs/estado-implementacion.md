@@ -1,5 +1,7 @@
 # Estado real de la implementación (v0.1 en construcción)
 
+> Fallos detectados, riesgos y prioridades: ver [informe-mejoras.md](informe-mejoras.md).
+
 > Se actualiza con cada incremento. Distingue: **diseñado** (en `docs/`), **implementado** (existe el código), **probado** (se ejecutó y pasó, indicando dónde) y **pendiente**. Fecha: 18-nov-2026.
 
 ## Resumen
@@ -8,8 +10,8 @@
 |---|---|---|
 | Esquema Oracle (70 tablas) + migraciones + 19 pruebas de humo | Implementado y probado | Oracle 26ai Free (contenedor remoto) |
 | Motor nutricional (`backend/nutrition`) | Implementado y probado: 25 pruebas unitarias | Maven, JDK 21 (remoto) |
-| API REST Quarkus (`backend/app`) | Implementado y probado: 11 pruebas de integración contra Oracle real | Remoto |
-| Frontend Angular 22 (`frontend`) | Implementado; 6 pruebas unitarias; recorrido en Chromium real 14/14 | Remoto |
+| API REST Quarkus (`backend/app`) | Implementado y probado: 14 pruebas de integración contra Oracle real | Remoto |
+| Frontend Angular 22 (`frontend`) | Implementado; 9 pruebas unitarias; recorrido en Chromium real 14/14 | Remoto |
 | Docker Compose (Oracle + migraciones + backend + nginx) | Cableado **probado** en remoto con imágenes runtime precompiladas; **la construcción multi-etapa de los Dockerfiles NO se ha ejecutado** | Remoto (parcial) |
 | Scripts PowerShell | Escritos, **no ejecutados** (sin PowerShell remoto) | — |
 | Todo lo anterior en **tu Windows** | **Pendiente de que lo ejecutes** | — |
@@ -70,3 +72,7 @@ npx playwright install chromium                                        # una sol
 npm start                                                              # en otra consola (con el backend en marcha)
 node e2e/journey.mjs                                                   # recorrido completo en navegador (12 comprobaciones)
 ```
+
+## Correcciones tras el sondeo de fallos (27-nov-2026)
+
+Corregidos y con prueba: cantidades absurdas (antes 500 al guardar → ahora 400 con mensaje), reintentos simultáneos con el mismo id (ahora todos 201 y un solo registro), identidad de desarrollo en contextos no seguros (ya no existe el id fijo compartido), fecha inválida (400), Swagger UI fuera del contenedor, mensajes de unidad en español, orden de comprobaciones al borrar alimentos del catálogo (404 siempre) y topes de tamaño de listas. La app ya incluye manifiesto e iconos (instalable en el móvil); **no** hay service worker (sin conexión) todavía.

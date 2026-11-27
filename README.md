@@ -26,6 +26,7 @@ cd C:\Users\corte\Documents\FITona
 | H · Costes | [docs/producto/H-costes.md](docs/producto/H-costes.md) |
 | I · Riesgos | [docs/producto/I-riesgos.md](docs/producto/I-riesgos.md) |
 | **J · Propuesta final (empezar aquí)** | [docs/producto/J-propuesta-final.md](docs/producto/J-propuesta-final.md) |
+| Informe de fallos y mejoras | [docs/informe-mejoras.md](docs/informe-mejoras.md) |
 | **Estado real de la implementación** | [docs/estado-implementacion.md](docs/estado-implementacion.md) |
 | Decisiones (ADR) | [docs/adr/](docs/adr/README.md) |
 | Investigaciones de apoyo | [docs/investigacion/](docs/investigacion/) |

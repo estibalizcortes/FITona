@@ -16,4 +16,4 @@ public record FoodRequest(
         @NotNull @Valid NutrientsDto per100,
         @Pattern(regexp = "PER_100G|PER_100ML") String basis,
         @DecimalMin("0.1") @DecimalMax("3") BigDecimal densityGPerMl,
-        @Valid List<PortionDto> portions) {}
+        @Size(max = 20) @Valid List<PortionDto> portions) {}

@@ -69,7 +69,9 @@ public class FoodService {
 
     @Transactional
     public void delete(UUID user, long variantId) {
-        if (repo.findVariant(user, variantId) == null) throw new NotFoundException();
+        FoodRecord cur = repo.findVariant(user, variantId);
+        // Los alimentos del catálogo compartido no se borran: respuesta idéntica a «no existe», sin depender del uso.
+        if (cur == null || !cur.editable()) throw new NotFoundException();
         if (repo.usedInRecipes(variantId)) {
             throw new ConflictException("El alimento se usa en alguna receta. Quítalo de las recetas antes de borrarlo.");
         }

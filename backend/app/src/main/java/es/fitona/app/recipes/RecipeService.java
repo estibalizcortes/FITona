@@ -143,7 +143,13 @@ public class RecipeService {
             FoodRecord f = foods.findVariant(user, i.variantId());
             if (f == null) throw new NotFoundException();
             UnitCatalog.UnitInfo unit = units.get(i.unitCode());
-            Conversion cv = PortionConverter.toGrams(i.quantity(), unit.spec(), List.of(), f.portions(), f.densityGPerMl());
+            Conversion cv;
+            try {
+                cv = PortionConverter.toGrams(i.quantity(), unit.spec(), List.of(), f.portions(), f.densityGPerMl());
+            } catch (es.fitona.nutrition.UnknownPortionException e) {
+                throw new es.fitona.nutrition.UnknownPortionException("No sé cuántos gramos son «" + unit.plural() + "» de "
+                        + f.name() + ". Usa gramos o añade esa medida al alimento.");
+            }
             parts.add(NutritionCalculator.forIntake(new Intake(f.profile(), cv.grams(), cv.precision())));
             rows.add(new RecipeRepository.IngredientRow(i.variantId(), null, i.quantity(), unit.spec().code(),
                     cv.grams().setScale(2, RoundingMode.HALF_UP), i.note()));

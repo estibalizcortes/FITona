@@ -31,8 +31,14 @@ public class DiaryResource {
     CurrentUser user;
 
     @GET
-    public DiaryDto day(@QueryParam("date") LocalDate date) {
-        return service.day(user.id(), date == null ? LocalDate.now() : date);
+    public DiaryDto day(@QueryParam("date") String date) {
+        LocalDate d;
+        try {
+            d = date == null || date.isBlank() ? LocalDate.now() : LocalDate.parse(date);
+        } catch (java.time.format.DateTimeParseException e) {
+            throw new IllegalArgumentException("Fecha no válida (use AAAA-MM-DD).");
+        }
+        return service.day(user.id(), d);
     }
 
     @POST

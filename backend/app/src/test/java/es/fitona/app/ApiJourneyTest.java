@@ -135,7 +135,7 @@ class ApiJourneyTest {
         long v = createFood(me, APPLE);
         // Sin medida casera para esa unidad: NO se inventan gramos
         as(me).body("{\"items\":[{\"variantId\":" + v + ",\"quantity\":1,\"unitCode\":\"GLASS\"}]}").post("/api/v1/calc")
-                .then().statusCode(422).body("detail", containsString("GLASS"));
+                .then().statusCode(422).body("detail", containsString("vasos"));
         // Volumen sin densidad: tampoco
         as(me).body("{\"items\":[{\"variantId\":" + v + ",\"quantity\":1,\"unitCode\":\"ML\"}]}").post("/api/v1/calc")
                 .then().statusCode(422);
@@ -260,5 +260,47 @@ class ApiJourneyTest {
         for (String key : as(me).get("/api/v1/recipes/templates").jsonPath().getList("key", String.class)) {
             as(me).post("/api/v1/recipes/templates/" + key + "/copy").then().statusCode(201).body("completeness", equalTo("COMPLETE"));
         }
+    }
+
+    @Test
+    void absurdQuantitiesAndOversizedListsAreRejectedWithAClearMessageNotA500() {
+        UUID me = UUID.randomUUID();
+        long egg = as(me).get("/api/v1/foods?q=huevo").jsonPath().getLong("[0].variantId");
+        as(me).body("{\"items\":[{\"variantId\":" + egg + ",\"quantity\":1e30,\"unitCode\":\"G\"}]}").post("/api/v1/calc")
+                .then().statusCode(400);
+        as(me).body("{\"date\":\"" + LocalDate.now() + "\",\"mealSlot\":\"LUNCH\",\"items\":[{\"variantId\":" + egg
+                + ",\"quantity\":99999999999,\"unitCode\":\"G\"}]}").post("/api/v1/diary/entries").then().statusCode(400);
+        as(me).body("{\"title\":\"x\",\"servings\":1,\"ingredients\":[{\"variantId\":" + egg
+                + ",\"quantity\":99999999999,\"unitCode\":\"G\"}]}").post("/api/v1/recipes").then().statusCode(400);
+        StringBuilder steps = new StringBuilder();
+        for (int i = 0; i < 101; i++) steps.append(i == 0 ? "" : ",").append("{\"instruction\":\"p\"}");
+        as(me).body("{\"title\":\"x\",\"servings\":1,\"ingredients\":[{\"freeText\":\"sal\"}],\"steps\":[" + steps + "]}")
+                .post("/api/v1/recipes").then().statusCode(400);
+        // el límite razonable sigue funcionando
+        as(me).body("{\"items\":[{\"variantId\":" + egg + ",\"quantity\":100000,\"unitCode\":\"G\"}]}").post("/api/v1/calc")
+                .then().statusCode(200);
+    }
+
+    @Test
+    void invalidDateIsA400AndUnitErrorsSpeakSpanish() {
+        UUID me = UUID.randomUUID();
+        as(me).get("/api/v1/diary?date=abc").then().statusCode(400).body("detail", containsString("AAAA-MM-DD"));
+        long rice = as(me).get("/api/v1/foods?q=arroz").jsonPath().getLong("[0].variantId");
+        as(me).body("{\"items\":[{\"variantId\":" + rice + ",\"quantity\":1,\"unitCode\":\"GLASS\"}]}").post("/api/v1/calc")
+                .then().statusCode(422).body("detail", containsString("vasos")).body("detail", containsString("Arroz"));
+    }
+
+    @Test
+    void parallelRetriesOfTheSameEntryAllSucceedAndStoreOnlyOne() throws Exception {
+        UUID me = UUID.randomUUID();
+        UUID id = UUID.randomUUID();
+        String body = "{\"id\":\"" + id + "\",\"date\":\"" + LocalDate.now()
+                + "\",\"mealSlot\":\"LUNCH\",\"items\":[{\"freeText\":\"Lentejas\"}]}";
+        java.util.concurrent.ExecutorService pool = java.util.concurrent.Executors.newFixedThreadPool(8);
+        java.util.List<java.util.concurrent.Future<Integer>> calls = new java.util.ArrayList<>();
+        for (int i = 0; i < 8; i++) calls.add(pool.submit(() -> as(me).body(body).post("/api/v1/diary/entries").statusCode()));
+        for (java.util.concurrent.Future<Integer> f : calls) org.junit.jupiter.api.Assertions.assertEquals(201, f.get());
+        pool.shutdown();
+        as(me).get("/api/v1/diary").then().body("entries", hasSize(1));
     }
 }

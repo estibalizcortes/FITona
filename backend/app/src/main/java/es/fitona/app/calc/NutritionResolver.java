@@ -55,7 +55,13 @@ public class NutritionResolver {
         if (f == null) throw new NotFoundException();
         if (r.quantity() == null) throw new IllegalArgumentException("Indica la cantidad.");
         UnitCatalog.UnitInfo unit = units.get(r.unitCode());
-        Conversion c = PortionConverter.toGrams(r.quantity(), unit.spec(), List.of(), f.portions(), f.densityGPerMl());
+        Conversion c;
+        try {
+            c = PortionConverter.toGrams(r.quantity(), unit.spec(), List.of(), f.portions(), f.densityGPerMl());
+        } catch (es.fitona.nutrition.UnknownPortionException e) {
+            throw new es.fitona.nutrition.UnknownPortionException("No sé cuántos gramos son «" + unit.plural() + "» de "
+                    + f.name() + ". Usa gramos o añade esa medida al alimento.");
+        }
         NutrientTotals totals = NutritionCalculator.forIntake(new Intake(f.profile(), c.grams(), c.precision()));
         return new ResolvedItem("FOOD", f.displayName(), f.variantId(), f.profileId(), null, null, r.quantity(),
                 unit.spec().code(), c.grams(), null, totals);

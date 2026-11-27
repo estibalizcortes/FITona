@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { Api, errorMessage } from '../core/api';
+import { newUuid } from '../core/identity';
 import { SLOT_NAMES, slotForNow, todayIso, unitLabel } from '../core/format';
 import { CalcResponse, Food, ItemRequest, RecipeSummary, Reference } from '../core/models';
 import { FoodPicker } from '../shared/food-picker';
@@ -135,7 +136,7 @@ export class AddPage implements OnInit {
   protected readonly error = signal('');
   private reference: Reference | null = null;
   /** Mismo id en los reintentos de guardado: el servidor no duplica el registro. */
-  private readonly entryId = crypto.randomUUID();
+  private readonly entryId = newUuid();
 
   protected readonly hasDraft = computed(() => this.draft().length > 0);
 

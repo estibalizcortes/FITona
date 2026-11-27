@@ -15,4 +15,4 @@ public record DiaryEntryRequest(
         @NotNull LocalDate date,
         @NotNull @Pattern(regexp = "BREAKFAST|MID_MORNING|LUNCH|AFTERNOON_SNACK|DINNER|OTHER") String mealSlot,
         @Size(max = 500) String note,
-        @NotEmpty @Valid List<ItemRequest> items) {}
+        @NotEmpty @Size(max = 50) @Valid List<ItemRequest> items) {}

@@ -21,7 +21,7 @@ import java.util.List;
 @Consumes(MediaType.APPLICATION_JSON)
 public class CalcResource {
 
-    public record CalcRequest(@NotEmpty @Valid List<ItemRequest> items) {}
+    public record CalcRequest(@NotEmpty @jakarta.validation.constraints.Size(max = 50) @Valid List<ItemRequest> items) {}
 
     public record CalcItem(String kind, String displayName, BigDecimal grams, TotalsDto totals) {}
 

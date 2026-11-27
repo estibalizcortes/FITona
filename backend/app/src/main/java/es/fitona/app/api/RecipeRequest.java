@@ -16,12 +16,12 @@ public record RecipeRequest(
         @NotNull @DecimalMin(value = "0", inclusive = false) @DecimalMax("200") BigDecimal servings,
         Integer prepMinutes,
         Integer cookMinutes,
-        @NotEmpty @Valid List<Ingredient> ingredients,
-        @Valid List<Step> steps) {
+        @NotEmpty @Size(max = 100) @Valid List<Ingredient> ingredients,
+        @Size(max = 100) @Valid List<Step> steps) {
 
     /** Ingrediente: un alimento del catálogo con cantidad, o texto libre sin resolver (la nutrición quedará PARTIAL). */
     public record Ingredient(Long variantId, @Size(max = 200) String freeText,
-                             @DecimalMin("0") BigDecimal quantity, @Size(max = 20) String unitCode,
+                             @DecimalMin("0") @DecimalMax("100000") BigDecimal quantity, @Size(max = 20) String unitCode,
                              @Size(max = 300) String note) {}
 
     public record Step(@NotBlank @Size(max = 2000) String instruction, Integer durationMinutes) {}

@@ -47,7 +47,13 @@ public class DiaryService {
         for (ItemRequest r : req.items()) items.add(resolver.resolve(user, r));
 
         boolean allFree = items.stream().allMatch(i -> i.kind().equals("FREE_TEXT"));
-        repo.insertEntry(user, id, req.date(), req.mealSlot(), allFree ? "QUICK_NOTE" : "SEARCH", req.note());
+        try {
+            repo.insertEntry(user, id, req.date(), req.mealSlot(), allFree ? "QUICK_NOTE" : "SEARCH", req.note());
+        } catch (es.fitona.app.infra.Db.DataAccessException e) {
+            // Reintento simultáneo con el mismo id: el otro ya lo guardó (clave única, ORA-00001). Devolver ese registro.
+            if (e.errorCode() == 1 && repo.exists(user, id)) return get(user, id);
+            throw e;
+        }
         int sort = 0;
         for (ResolvedItem it : items) {
             repo.insertItem(id, ++sort, it);
