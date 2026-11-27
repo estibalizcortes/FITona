@@ -33,8 +33,15 @@ public class FoodResource {
     CurrentUser user;
 
     @GET
-    public List<FoodDto> search(@QueryParam("q") String q, @QueryParam("limit") @DefaultValue("20") int limit) {
-        return service.search(user.id(), q, limit);
+    public List<FoodDto> search(@QueryParam("q") String q, @QueryParam("limit") @DefaultValue("20") int limit,
+                                @QueryParam("category") String category) {
+        return service.search(user.id(), q, limit, category);
+    }
+
+    @GET
+    @Path("/categories")
+    public List<FoodRepository.Category> categories() {
+        return service.categories(user.id());
     }
 
     @GET

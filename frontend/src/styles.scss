@@ -107,3 +107,17 @@ summary { cursor: pointer; font-weight: 600; min-height: var(--tap); display: fl
 .warn { background: var(--warn-bg); color: var(--warn-text); }
 .ok { background: var(--ok-bg); color: var(--ok-text); }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* Categorías e imágenes de alimentos */
+.icon { font-size: 1.7rem; line-height: 1; flex: none; width: 2.2rem; text-align: center; }
+.grow { flex: 1; min-width: 0; }
+.block { display: block; }
+.result.with-icon { flex-direction: row; align-items: center; gap: .7rem; }
+.tiles { list-style: none; margin: .5rem 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: .6rem; }
+.tile {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .15rem; width: 100%; min-height: 96px;
+  text-align: center; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: .6rem; color: var(--text); font: inherit; cursor: pointer;
+}
+.tile .icon { font-size: 2rem; width: auto; }
+.tile:hover { border-color: var(--accent); }

@@ -35,6 +35,11 @@ public class ProblemMapper {
     }
 
     @ServerExceptionMapper
+    public Response noData(es.fitona.app.infra.NoNutrientDataException e) {
+        return problem(422, "Sin datos nutricionales", e.getMessage());
+    }
+
+    @ServerExceptionMapper
     public Response conflict(es.fitona.app.infra.ConflictException e) {
         return problem(409, "Conflicto", e.getMessage());
     }

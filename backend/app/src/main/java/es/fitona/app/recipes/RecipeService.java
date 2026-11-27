@@ -142,6 +142,10 @@ public class RecipeService {
             if (i.quantity() == null) throw new IllegalArgumentException("Indica la cantidad de cada ingrediente.");
             FoodRecord f = foods.findVariant(user, i.variantId());
             if (f == null) throw new NotFoundException();
+            if (!f.hasNutrients()) {
+                throw new es.fitona.app.infra.NoNutrientDataException("«" + f.name() + "» aún no tiene datos nutricionales: "
+                        + "ponle tus valores antes de usarlo en una receta.");
+            }
             UnitCatalog.UnitInfo unit = units.get(i.unitCode());
             Conversion cv;
             try {

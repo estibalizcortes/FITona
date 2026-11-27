@@ -35,9 +35,13 @@ public class FoodService {
     @Inject
     UnitCatalog units;
 
-    public List<FoodDto> search(UUID user, String q, int limit) {
-        int l = Math.max(1, Math.min(limit, 50));
-        return repo.search(user, q, l).stream().map(FoodService::toDto).toList();
+    public List<FoodDto> search(UUID user, String q, int limit, String category) {
+        int l = Math.max(1, Math.min(limit, 200));
+        return repo.search(user, q, l, false, category).stream().map(FoodService::toDto).toList();
+    }
+
+    public List<FoodRepository.Category> categories(UUID user) {
+        return repo.categories(user);
     }
 
     /** Solo los alimentos propios (sin límite práctico), para exportar los datos de la persona. */
@@ -55,7 +59,14 @@ public class FoodService {
     public FoodResponse create(UUID user, FoodRequest req) {
         List<String> warnings = new ArrayList<>();
         FoodRepository.NewFood nf = prepare(req, warnings);
-        long variantId = repo.create(user, nf);
+        Long overrides = null;
+        if (req.basedOnVariantId() != null) {
+            FoodRecord base = repo.findVariant(user, req.basedOnVariantId());
+            if (base == null || base.editable()) throw new IllegalArgumentException("Solo se pueden personalizar alimentos del catálogo.");
+            overrides = base.foodId();
+        }
+        long variantId = repo.create(user, new FoodRepository.NewFood(nf.name(), nf.values(), nf.energyOrigin(), nf.basis(),
+                nf.density(), nf.portions(), nf.categoryCode(), overrides));
         return new FoodResponse(get(user, variantId), warnings);
     }
 
@@ -137,13 +148,16 @@ public class FoodService {
                         p.precision() == null ? Precision.APPROXIMATE : Precision.valueOf(p.precision())));
             }
         }
-        return new FoodRepository.NewFood(req.name().trim(), v, origin, basis, req.densityGPerMl(), portions);
+        return new FoodRepository.NewFood(req.name().trim(), v, origin, basis, req.densityGPerMl(), portions,
+                req.categoryCode(), null);
     }
 
     static FoodDto toDto(FoodRecord r) {
         List<PortionDto> portions = r.portions().stream()
                 .map(p -> new PortionDto(p.unitCode(), p.grams(), p.precision().name())).toList();
-        return new FoodDto(r.variantId(), r.foodId(), r.name(), r.displayName(), r.profile().quality().name(), r.basis(),
-                NutrientsDto.fromMap(r.profile().per100()), r.densityGPerMl(), portions, r.editable(), r.source());
+        return new FoodDto(r.variantId(), r.foodId(), r.name(), r.displayName(),
+                r.hasNutrients() ? r.profile().quality().name() : "NONE", r.basis(),
+                NutrientsDto.fromMap(r.hasNutrients() ? r.profile().per100() : Map.of()), r.densityGPerMl(), portions,
+                r.editable(), r.source(), r.icon(), r.categoryCode(), r.categoryName(), r.hasNutrients(), r.overridesCatalog());
     }
 }

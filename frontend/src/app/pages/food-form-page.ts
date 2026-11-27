@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, input, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { Api, errorMessage } from '../core/api';
-import { Food, FoodRequest, NutrientKey, Portion, Reference } from '../core/models';
+import { Food, FoodCategory, FoodRequest, NutrientKey, Portion, Reference } from '../core/models';
+import { per100, reliability } from '../core/format';
 
 const FIELDS: { key: NutrientKey; label: string; unit: string; hint?: string }[] = [
   { key: 'energyKcal', label: 'Energía', unit: 'kcal', hint: 'Si lo dejas vacío se calcula con los factores de la UE a partir de los macros.' },
@@ -21,8 +22,7 @@ const FIELDS: { key: NutrientKey; label: string; unit: string; hint?: string }[]
   imports: [RouterLink],
   template: `
     <section>
-      <h1>{{ editing() ? 'Editar alimento' : 'Crear alimento' }}</h1>
-      <p class="muted">Valores <strong>por 100 g</strong>. Deja vacío lo que no sepas: «sin dato» no es lo mismo que 0.</p>
+      <h1>{{ catalog() ? (catalog()!.icon || '🍽️') + ' ' + catalog()!.displayName : (editing() ? 'Editar alimento' : (basedOnFood() ? 'Tus valores para ' + basedOnFood()!.name : 'Crear alimento')) }}</h1>
 
       @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
       @for (w of warnings(); track w) { <p class="warn" role="status">{{ w }}</p> }
@@ -33,10 +33,37 @@ const FIELDS: { key: NutrientKey; label: string; unit: string; hint?: string }[]
         </div>
       }
 
+      @if (catalog(); as c) {
+        <article class="card">
+          <p class="muted">Alimento del catálogo{{ c.categoryName ? ' · ' + c.categoryName : '' }}. No se puede editar, pero puedes poner <strong>tus propios valores</strong> (los del producto que compras) y se usarán en tu lugar.</p>
+          @if (c.hasNutrients) {
+            <p class="warn">Valores aproximados, sin verificar ({{ reliabilityLabel(c) }}).</p>
+            <ul class="items">
+              @for (f of fields; track f.key) { <li class="between"><span>{{ f.label }}</span><strong>{{ value100(c, f.key) }} {{ c.per100[f.key] === null || c.per100[f.key] === undefined ? '' : f.unit }}</strong></li> }
+            </ul>
+          } @else {
+            <p class="warn">Este alimento aún no tiene datos nutricionales. Puedes ponerle los tuyos o apuntarlo sin cifras.</p>
+          }
+          <div class="actions">
+            <a class="btn primary" routerLink="/alimentos/nuevo" [queryParams]="{ basedOn: c.variantId }">Poner mis valores</a>
+            <a class="btn" routerLink="/alimentos">Volver</a>
+          </div>
+        </article>
+      } @else {
+      @if (basedOnFood()) { <p class="muted">Se usará <strong>en lugar del alimento del catálogo</strong>, solo para ti. Si luego borras el tuyo, vuelve el del catálogo.</p> }
+      <p class="muted">Valores <strong>por 100 g</strong>. Deja vacío lo que no sepas: «sin dato» no es lo mismo que 0.</p>
       <form (submit)="submit($event)">
         <label class="field">
           <span>Nombre</span>
           <input type="text" required maxlength="150" [value]="name()" (input)="name.set($any($event.target).value)" />
+        </label>
+
+        <label class="field">
+          <span>Categoría</span>
+          <select aria-label="Categoría" [value]="category()" (change)="category.set($any($event.target).value)">
+            <option value="">Sin categoría</option>
+            @for (c of categories(); track c.code) { <option [value]="c.code" [selected]="c.code === category()">{{ c.icon }} {{ c.name }}</option> }
+          </select>
         </label>
 
         <fieldset>
@@ -79,14 +106,17 @@ const FIELDS: { key: NutrientKey; label: string; unit: string; hint?: string }[]
 
         <div class="actions">
           <button type="submit" class="btn primary big" [disabled]="saving()">{{ saving() ? 'Guardando…' : 'Guardar alimento' }}</button>
-          @if (editing()) { <button type="button" class="btn danger" (click)="remove()">Borrar alimento</button> }
+          @if (editing()) { <button type="button" class="btn danger" (click)="remove()">{{ overridesCatalog() ? 'Quitar mis valores (volver al catálogo)' : 'Borrar alimento' }}</button> }
         </div>
       </form>
+      }
     </section>
   `,
 })
 export class FoodFormPage implements OnInit {
   readonly id = input<string | undefined>();
+  /** Variante del catálogo para la que se ponen valores propios (query param ?basedOn=). */
+  readonly basedOn = input<string | undefined>();
   private readonly api = inject(Api);
   private readonly router = inject(Router);
 
@@ -101,23 +131,45 @@ export class FoodFormPage implements OnInit {
   protected readonly saving = signal(false);
   protected readonly saved = signal(false);
   protected readonly editing = signal(false);
+  protected readonly catalog = signal<Food | null>(null);
+  protected readonly basedOnFood = signal<Food | null>(null);
+  protected readonly overridesCatalog = signal(false);
+  protected readonly categories = signal<FoodCategory[]>([]);
+  protected readonly category = signal('');
   private variantId: number | null = null;
 
   async ngOnInit(): Promise<void> {
     try {
       const ref: Reference = await this.api.reference();
       this.householdUnits.set(ref.units.filter((u) => u.kind === 'HOUSEHOLD'));
+      this.categories.set((await this.api.foodCategories()).filter((c) => c.code !== 'MINE'));
       if (this.id()) {
-        this.variantId = Number(this.id());
+        const f = await this.api.getFood(Number(this.id()));
+        if (!f.editable) { this.catalog.set(f); return; }
+        this.variantId = f.variantId;
         this.editing.set(true);
-        this.fill(await this.api.getFood(this.variantId));
+        this.fill(f);
+      } else if (this.basedOn()) {
+        const base = await this.api.getFood(Number(this.basedOn()));
+        this.basedOnFood.set(base);
+        this.name.set(base.name);
+        this.category.set(base.categoryCode ?? '');
+        if (base.hasNutrients) this.fillValues(base);
       }
     } catch (e) { this.error.set(errorMessage(e)); }
   }
 
+  protected reliabilityLabel(f: Food): string { return reliability(f.quality).label; }
+  protected value100(f: Food, key: NutrientKey): string { return per100(f.per100, key, '').trim(); }
+
   private fill(f: Food): void {
-    if (!f.editable) { this.error.set('Este alimento es del catálogo y no se puede editar.'); }
     this.name.set(f.name);
+    this.category.set(f.categoryCode ?? '');
+    this.overridesCatalog.set(f.overridesCatalog);
+    this.fillValues(f);
+  }
+
+  private fillValues(f: Food): void {
     const v: Partial<Record<NutrientKey, string>> = {};
     for (const k of FIELDS) { const x = f.per100[k.key]; if (x !== null && x !== undefined) v[k.key] = String(x); }
     this.values.set(v);
@@ -148,6 +200,8 @@ export class FoodFormPage implements OnInit {
     return {
       name: this.name().trim(),
       per100,
+      categoryCode: this.category() || null,
+      basedOnVariantId: this.variantId ? null : (this.basedOnFood()?.variantId ?? null),
       densityGPerMl: this.num(this.density()),
       portions: this.portions().filter((p) => this.num(p.grams) !== null)
         .map((p) => ({ unitCode: p.unitCode, grams: this.num(p.grams)!, precision: 'APPROXIMATE' })),

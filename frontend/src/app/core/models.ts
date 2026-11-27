@@ -20,13 +20,24 @@ export interface Food {
   portions: Portion[];
   editable: boolean;
   source: string;
+  icon: string | null;
+  categoryCode: string | null;
+  categoryName: string | null;
+  /** false = está en el catálogo pero aún sin datos nutricionales (no se inventan). */
+  hasNutrients: boolean;
+  overridesCatalog: boolean;
 }
+
+export interface FoodCategory { code: string; name: string; icon: string; count: number }
 
 export interface FoodRequest {
   name: string;
   per100: Nutrients;
   densityGPerMl?: number | null;
   portions?: Portion[];
+  categoryCode?: string | null;
+  /** Variante del catálogo a la que sustituye (solo para ti) con estos valores. */
+  basedOnVariantId?: number | null;
 }
 
 export interface FoodResponse { food: Food; warnings: string[] }

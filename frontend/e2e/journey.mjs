@@ -113,6 +113,30 @@ try {
   const tort = await page.locator('main').innerText();
   check('una receta típica se copia y se calcula con el catálogo (tortilla ≈ 329 kcal/ración)', /329 kcal/.test(tort), tort.split('\n').find((l) => /kcal/.test(l)) ?? '');
 
+  // 5c) Categorías con imagen, alimento sin datos y valores propios
+  await page.locator('nav.tabbar a', { hasText: 'Alimentos' }).click();
+  await page.waitForSelector('.tile');
+  const tiles = await page.locator('.tile').count();
+  check('la pantalla de alimentos muestra las categorías (34 con «Mis alimentos»)', tiles === 34, `${tiles} categorías`);
+  await page.getByRole('button', { name: /Frutas/ }).click();
+  await page.waitForSelector('text=Aguacate');
+  const icons = await page.locator('.result .icon').allInnerTexts();
+  check('cada alimento de la categoría lleva su imagen (31 frutas)', icons.length === 31 && icons.every((i) => i.trim().length > 0) && icons.includes('🥑'), `${icons.length} alimentos`);
+  await page.getByRole('link', { name: /Aguacate/ }).click();
+  await page.waitForSelector('text=Poner mis valores');
+  check('un alimento sin datos lo dice y no inventa cifras', /aún no tiene datos nutricionales/.test(await page.locator('main').innerText()));
+  await page.getByRole('link', { name: 'Poner mis valores' }).click();
+  await page.getByLabel('Energía (kcal)').fill('160');
+  await page.getByLabel('Grasas (g)').fill('14.7');
+  await page.getByRole('button', { name: 'Guardar alimento' }).click();
+  await page.waitForSelector('text=Alimento guardado');
+  await page.locator('nav.tabbar a', { hasText: 'Alimentos' }).click();
+  await page.getByLabel('Buscar').fill('aguacate');
+  await page.waitForSelector('text=tus valores');
+  const av = await page.locator('main').innerText();
+  check('tus valores sustituyen al alimento del catálogo (solo uno «Aguacate», con datos)', (av.match(/Aguacate/g) ?? []).length === 1 && /160 kcal/.test(av) && !/Sin datos nutricionales/.test(av), av.replace(/\s+/g, ' ').slice(0, 120));
+  await page.screenshot({ path: `${SHOTS}/5-categorias.png` });
+
   // 6) Datos del usuario
   await page.getByRole('link', { name: 'Yo' }).click();
   const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: /Descargar mis datos/ }).click()]);

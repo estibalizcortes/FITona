@@ -53,6 +53,10 @@ public class NutritionResolver {
     private ResolvedItem food(UUID user, ItemRequest r) {
         FoodRecord f = foods.findVariant(user, r.variantId());
         if (f == null) throw new NotFoundException();
+        if (!f.hasNutrients()) {
+            throw new es.fitona.app.infra.NoNutrientDataException("«" + f.name() + "» aún no tiene datos nutricionales. "
+                    + "Ponle tus valores o apúntalo sin cifras.");
+        }
         if (r.quantity() == null) throw new IllegalArgumentException("Indica la cantidad.");
         UnitCatalog.UnitInfo unit = units.get(r.unitCode());
         Conversion c;

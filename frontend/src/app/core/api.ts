@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import {
-  CalcResponse, Diary, DiaryEntry, Food, FoodRequest, FoodResponse, ItemRequest, Recipe, RecipeRequest,
+  CalcResponse, Diary, DiaryEntry, Food, FoodCategory, FoodRequest, FoodResponse, ItemRequest, Recipe, RecipeRequest,
   RecipeSummary, Reference,
 } from './models';
 
@@ -13,9 +13,12 @@ export class Api {
 
   reference(): Promise<Reference> { return firstValueFrom(this.http.get<Reference>(`${this.base}/reference`)); }
 
-  searchFoods(q: string): Promise<Food[]> {
-    return firstValueFrom(this.http.get<Food[]>(`${this.base}/foods`, { params: { q, limit: 25 } }));
+  searchFoods(q: string, category: string | null = null, limit = 25): Promise<Food[]> {
+    const params: Record<string, string | number> = { q, limit };
+    if (category) params['category'] = category;
+    return firstValueFrom(this.http.get<Food[]>(`${this.base}/foods`, { params }));
   }
+  foodCategories(): Promise<FoodCategory[]> { return firstValueFrom(this.http.get<FoodCategory[]>(`${this.base}/foods/categories`)); }
   getFood(id: number): Promise<Food> { return firstValueFrom(this.http.get<Food>(`${this.base}/foods/${id}`)); }
   createFood(r: FoodRequest): Promise<FoodResponse> { return firstValueFrom(this.http.post<FoodResponse>(`${this.base}/foods`, r)); }
   updateFood(id: number, r: FoodRequest): Promise<FoodResponse> { return firstValueFrom(this.http.put<FoodResponse>(`${this.base}/foods/${id}`, r)); }

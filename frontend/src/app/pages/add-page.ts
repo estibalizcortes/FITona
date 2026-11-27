@@ -31,8 +31,19 @@ interface DraftItem { label: string; req: ItemRequest }
       </div>
 
       @if (selected(); as f) {
+        @if (!f.hasNutrients) {
         <article class="card">
-          <h2>{{ f.displayName }}</h2>
+          <h2>{{ f.icon || '🍽️' }} {{ f.displayName }}</h2>
+          <p class="warn">Este alimento aún no tiene datos nutricionales (no los inventamos). Puedes ponerle tus valores o apuntarlo sin cifras.</p>
+          <div class="actions">
+            <button type="button" class="btn primary" (click)="setValues(f)">Poner mis valores</button>
+            <button type="button" class="btn" (click)="addNoFigures(f)">Apuntar sin cifras</button>
+            <button type="button" class="btn" (click)="selected.set(null)">Cancelar</button>
+          </div>
+        </article>
+        } @else {
+        <article class="card">
+          <h2>{{ f.icon || '🍽️' }} {{ f.displayName }}</h2>
           <div class="row">
             <label class="field">
               <span>Cantidad</span>
@@ -54,6 +65,7 @@ interface DraftItem { label: string; req: ItemRequest }
             <button type="button" class="btn" (click)="selected.set(null)">Cancelar</button>
           </div>
         </article>
+        }
       } @else {
         <app-food-picker (picked)="pick($event)" />
 
@@ -147,6 +159,15 @@ export class AddPage implements OnInit {
       this.reference = await this.api.reference();
       this.recipes.set(await this.api.recipes());
     } catch (e) { this.error.set(errorMessage(e)); }
+  }
+
+  protected setValues(f: Food): void {
+    void this.router.navigate(['/alimentos/nuevo'], { queryParams: { basedOn: f.variantId } });
+  }
+
+  protected async addNoFigures(f: Food): Promise<void> {
+    await this.push({ label: `${f.name} (sin cifras)`, req: { freeText: f.name } });
+    this.selected.set(null);
   }
 
   protected pick(f: Food): void {

@@ -100,6 +100,11 @@ export class RecipeFormPage implements OnInit {
   }
 
   protected addFood(f: Food): void {
+    if (!f.hasNutrients) {
+      this.error.set(`«${f.name}» aún no tiene datos nutricionales: ponle tus valores en Alimentos antes de usarlo en una receta, o añádelo como texto libre.`);
+      return;
+    }
+    this.error.set('');
     const first = f.portions[0];
     this.rows.update((r) => [...r, { food: f, freeText: '', qty: first ? '1' : '100', unit: first ? first.unitCode : 'G' }]);
   }

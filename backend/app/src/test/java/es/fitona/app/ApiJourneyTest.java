@@ -228,9 +228,10 @@ class ApiJourneyTest {
         as(me).get("/api/v1/foods?q=batata").then().statusCode(200).body("name", org.hamcrest.Matchers.hasItem("Boniato"));
         as(me).get("/api/v1/foods?q=Habichuelas").then().body("name", org.hamcrest.Matchers.hasItem("Judías verdes"));
         as(me).get("/api/v1/foods?q=queso granulado").then().body("name", org.hamcrest.Matchers.hasItem("Queso cottage"));
-        Response rice = as(me).get("/api/v1/foods?q=arroz");
+        Response rice = as(me).get("/api/v1/foods?q=arroz blanco");
         rice.then().body("$", hasSize(2)).body("quality", org.hamcrest.Matchers.everyItem(equalTo("ESTIMATE")))
                 .body("source", org.hamcrest.Matchers.everyItem(containsString("sin verificar")))
+                .body("icon", org.hamcrest.Matchers.everyItem(equalTo("🍚")))
                 .body("editable", org.hamcrest.Matchers.everyItem(equalTo(false)));
         // 100 g de arroz crudo y 100 g de arroz cocido NO son equivalentes (365 frente a 130 kcal)
         rice.then().body("find { it.displayName.contains('crudo') }.per100.energyKcal", equalTo(365))
@@ -240,7 +241,7 @@ class ApiJourneyTest {
         as(me).body(APPLE).put("/api/v1/foods/" + id).then().statusCode(404);
         as(me).delete("/api/v1/foods/" + id).then().statusCode(404);
         // Medida casera del huevo y registro con cantidad en unidades
-        long egg = as(me).get("/api/v1/foods?q=huevo").jsonPath().getLong("[0].variantId");
+        long egg = as(me).get("/api/v1/foods?q=huevo de gallina").jsonPath().getLong("[0].variantId");
         as(me).body("{\"items\":[{\"variantId\":" + egg + ",\"quantity\":2,\"unitCode\":\"UNIT\"}]}").post("/api/v1/calc")
                 .then().statusCode(200).body("items[0].grams", equalTo(110)).body("total.quality", equalTo("ESTIMATE"));
     }
@@ -265,7 +266,7 @@ class ApiJourneyTest {
     @Test
     void absurdQuantitiesAndOversizedListsAreRejectedWithAClearMessageNotA500() {
         UUID me = UUID.randomUUID();
-        long egg = as(me).get("/api/v1/foods?q=huevo").jsonPath().getLong("[0].variantId");
+        long egg = as(me).get("/api/v1/foods?q=huevo de gallina").jsonPath().getLong("[0].variantId");
         as(me).body("{\"items\":[{\"variantId\":" + egg + ",\"quantity\":1e30,\"unitCode\":\"G\"}]}").post("/api/v1/calc")
                 .then().statusCode(400);
         as(me).body("{\"date\":\"" + LocalDate.now() + "\",\"mealSlot\":\"LUNCH\",\"items\":[{\"variantId\":" + egg
@@ -285,7 +286,7 @@ class ApiJourneyTest {
     void invalidDateIsA400AndUnitErrorsSpeakSpanish() {
         UUID me = UUID.randomUUID();
         as(me).get("/api/v1/diary?date=abc").then().statusCode(400).body("detail", containsString("AAAA-MM-DD"));
-        long rice = as(me).get("/api/v1/foods?q=arroz").jsonPath().getLong("[0].variantId");
+        long rice = as(me).get("/api/v1/foods?q=arroz blanco cocido").jsonPath().getLong("[0].variantId");
         as(me).body("{\"items\":[{\"variantId\":" + rice + ",\"quantity\":1,\"unitCode\":\"GLASS\"}]}").post("/api/v1/calc")
                 .then().statusCode(422).body("detail", containsString("vasos")).body("detail", containsString("Arroz"));
     }
@@ -302,5 +303,58 @@ class ApiJourneyTest {
         for (java.util.concurrent.Future<Integer> f : calls) org.junit.jupiter.api.Assertions.assertEquals(201, f.get());
         pool.shutdown();
         as(me).get("/api/v1/diary").then().body("entries", hasSize(1));
+    }
+
+    @Test
+    void categoriesIconsAndFoodsWithoutNutrientData() {
+        UUID me = UUID.randomUUID();
+        Response cats = as(me).get("/api/v1/foods/categories");
+        cats.then().statusCode(200).body("$", hasSize(34)).body("[0].code", equalTo("MINE"))
+                .body("find { it.code == 'FRUTAS' }.name", equalTo("Frutas")).body("find { it.code == 'FRUTAS' }.icon", equalTo("🍎"));
+        int total = cats.jsonPath().getList("count", Integer.class).stream().mapToInt(Integer::intValue).sum();
+        org.junit.jupiter.api.Assertions.assertTrue(total >= 576, "el catálogo debe tener al menos 576 alimentos, hay " + total);
+        // filtro por categoría: solo esa categoría, y cada alimento con su imagen
+        as(me).get("/api/v1/foods?category=FRUTAS&limit=200").then().body("$", hasSize(31))
+                .body("categoryCode", org.hamcrest.Matchers.everyItem(equalTo("FRUTAS")))
+                .body("icon", org.hamcrest.Matchers.everyItem(org.hamcrest.Matchers.notNullValue()));
+        // sin icono propio, hereda el de su categoría
+        as(me).get("/api/v1/foods?q=fuet").then().body("[0].icon", equalTo("🥓")).body("[0].categoryName", equalTo("Embutidos y fiambres"));
+        // sin datos: se puede ver, pero no calcular ni usar en recetas (no se inventan cifras)
+        Response avocado = as(me).get("/api/v1/foods?q=aguacate");
+        avocado.then().body("[0].hasNutrients", equalTo(false)).body("[0].quality", equalTo("NONE"))
+                .body("[0].per100.energyKcal", org.hamcrest.Matchers.nullValue());
+        long av = avocado.jsonPath().getLong("[0].variantId");
+        as(me).body("{\"items\":[{\"variantId\":" + av + ",\"quantity\":100,\"unitCode\":\"G\"}]}").post("/api/v1/calc")
+                .then().statusCode(422).body("detail", containsString("datos nutricionales"));
+        as(me).body("{\"title\":\"x\",\"servings\":1,\"ingredients\":[{\"variantId\":" + av + ",\"quantity\":100,\"unitCode\":\"G\"}]}")
+                .post("/api/v1/recipes").then().statusCode(422);
+        // Retirados (DEPRECATED) del catálogo antiguo no salen en el buscador
+        as(me).get("/api/v1/foods?q=arroz blanco").then().body("name", org.hamcrest.Matchers.not(org.hamcrest.Matchers.hasItem("Arroz blanco")));
+    }
+
+    @Test
+    void aPersonCanSetOwnValuesForACatalogFoodAndGoBackToTheCatalogOne() {
+        UUID me = UUID.randomUUID();
+        UUID other = UUID.randomUUID();
+        Response avocado = as(me).get("/api/v1/foods?q=aguacate");
+        long av = avocado.jsonPath().getLong("[0].variantId");
+        Response mine = as(me).body("{\"name\":\"Aguacate\",\"basedOnVariantId\":" + av
+                + ",\"per100\":{\"energyKcal\":160,\"proteinG\":2,\"carbsG\":1.8,\"fatG\":14.7}}").post("/api/v1/foods");
+        mine.then().statusCode(201).body("food.overridesCatalog", equalTo(true)).body("food.editable", equalTo(true))
+                .body("food.icon", equalTo("🥑")).body("food.categoryCode", equalTo("FRUTAS")).body("food.quality", equalTo("CUSTOM"));
+        long mineId = mine.jsonPath().getLong("food.variantId");
+        // para mí el de catálogo desaparece del buscador y aparece el mío (con datos); para otra persona sigue el del catálogo
+        as(me).get("/api/v1/foods?q=aguacate").then().body("$", hasSize(1)).body("[0].variantId", equalTo((int) mineId))
+                .body("[0].hasNutrients", equalTo(true));
+        as(other).get("/api/v1/foods?q=aguacate").then().body("$", hasSize(1)).body("[0].variantId", equalTo((int) av))
+                .body("[0].hasNutrients", equalTo(false));
+        as(me).body("{\"items\":[{\"variantId\":" + mineId + ",\"quantity\":100,\"unitCode\":\"G\"}]}").post("/api/v1/calc")
+                .then().statusCode(200).body("total.nutrients.energyKcal.value", equalTo(160));
+        // un alimento propio no se puede «personalizar» y el del catálogo no se puede editar
+        as(me).body("{\"name\":\"x\",\"basedOnVariantId\":" + mineId + ",\"per100\":{\"proteinG\":1}}").post("/api/v1/foods").then().statusCode(400);
+        as(me).body("{\"name\":\"x\",\"per100\":{\"proteinG\":1}}").put("/api/v1/foods/" + av).then().statusCode(404);
+        // volver al valor del catálogo = borrar lo mío
+        as(me).delete("/api/v1/foods/" + mineId).then().statusCode(204);
+        as(me).get("/api/v1/foods?q=aguacate").then().body("[0].variantId", equalTo((int) av));
     }
 }

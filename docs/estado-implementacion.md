@@ -10,18 +10,21 @@
 |---|---|---|
 | Esquema Oracle (70 tablas) + migraciones + 19 pruebas de humo | Implementado y probado | Oracle 26ai Free (contenedor remoto) |
 | Motor nutricional (`backend/nutrition`) | Implementado y probado: 25 pruebas unitarias | Maven, JDK 21 (remoto) |
-| API REST Quarkus (`backend/app`) | Implementado y probado: 14 pruebas de integración contra Oracle real | Remoto |
-| Frontend Angular 22 (`frontend`) | Implementado; 9 pruebas unitarias; recorrido en Chromium real 14/14 | Remoto |
+| API REST Quarkus (`backend/app`) | Implementado y probado: 16 pruebas de integración contra Oracle real | Remoto |
+| Frontend Angular 22 (`frontend`) | Implementado; 9 pruebas unitarias; recorrido en Chromium real 18/18 | Remoto |
 | Docker Compose (Oracle + migraciones + backend + nginx) | Cableado **probado** en remoto con imágenes runtime precompiladas; **la construcción multi-etapa de los Dockerfiles NO se ha ejecutado** | Remoto (parcial) |
 | Scripts PowerShell | Escritos, **no ejecutados** (sin PowerShell remoto) | — |
 | Todo lo anterior en **tu Windows** | **Pendiente de que lo ejecutes** | — |
 
-## Catálogo de arranque y recetas típicas (nuevo)
+## Catálogo simplificado (576 alimentos, 33 categorías)
 
-- **46 alimentos genéricos** precargados (`V010`), con medidas caseras (1 huevo, 1 vaso, 1 cucharada…), sinónimos (batata = boniato, habichuelas = judías verdes, queso granulado = queso cottage) y variantes crudo/cocido separadas (arroz, pasta, patata, pollo).
-- **¡Valores sin verificar!** Son cifras de referencia aproximadas, escritas a mano (típicas de tablas tipo USDA), **no descargadas ni contrastadas con la fuente**. Por eso salen como «Estimación (~)» y con la etiqueta «aproximado, sin verificar». Hay que sustituirlas por una importación verificada (BEDCA con autorización de AESAN, USDA CC0 o CIQUAL). El generador está en `database/seed/generate_starter_catalog.py`.
-- **12 recetas típicas** copiables a «Mis recetas» (tortilla de patatas, lentejas, arroz con pollo…). Las cantidades son orientativas y los nutrientes los calcula el motor con el catálogo (tortilla: 329 kcal/ración, probado).
-- Los alimentos del catálogo no se pueden editar ni borrar; los productos de marca no se precargan (el modelo usa un alimento genérico medio: «Chocolate negro 70-85 %»).
+- **Fuente de los nombres y las categorías:** `database/seed/catalogo-alimentos.md` (tu lista editorial: genéricos, sin marcas, sin variantes innecesarias; p. ej. solo «Chocolate negro» y «Chocolate negro 75 %»). La migración `V011` se genera con `database/seed/generate_catalog_v011.py`.
+- **Categorías con imagen:** 33 grupos + «Mis alimentos»; cada alimento lleva un **emoji** (propio si existe uno adecuado, si no el de su categoría). Son emojis, no fotos: no hay fotos con licencia disponibles sin conexión.
+- **Datos nutricionales: SOLO 54 de los 576 alimentos tienen valores, y son aproximados, escritos a mano y SIN VERIFICAR** (marcados «Estimación» y «aproximado, sin verificar»). **Los otros 522 no tienen datos nutricionales** y no se inventan: se ven en el catálogo, pero para calcular hay que ponerles valores propios («Poner mis valores») o apuntarlos sin cifras.
+- **Valores propios:** en cualquier alimento del catálogo, «Poner mis valores» crea tu versión (por 100 g, con tus medidas) que **sustituye al del catálogo solo para ti**; si la borras, vuelve el del catálogo. Los alimentos propios siguen guardándose para siempre y se pueden crear desde cero («Crear alimento») si algo poco habitual no está.
+- **Cómo completar el catálogo con datos fiables:** rellenar `database/seed/nutrientes-pendientes.csv` (los 522 pendientes) con una fuente fiable y licenciada (USDA FoodData Central, CIQUAL o BEDCA con autorización) y ejecutar `python3 database/seed/apply_nutrients.py datos.csv V012`; genera la migración con la procedencia de cada valor. Probado con datos sintéticos de prueba (se deshizo); **no hay aún ningún dato verificado cargado**.
+- El catálogo anterior de 46 alimentos (V010) queda retirado del buscador pero sigue resolviendo registros y recetas ya guardados.
+- **12 recetas típicas** copiables a «Mis recetas» (tortilla de patatas, lentejas, arroz con pollo…). Cantidades orientativas; los nutrientes los calcula el motor con el catálogo (tortilla: 329 kcal/ración, probado).
 
 ## Funcionalidades utilizables hoy (verificadas en navegador)
 
