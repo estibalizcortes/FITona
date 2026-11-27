@@ -34,7 +34,10 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
   if (!req.url.startsWith('/api')) return next(req);
   const token = session.token();
-  const out = token ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }) : req;
+  // apiBase vacío = mismo dominio; en Render el sitio estático llama al backend por su URL completa (CORS).
+  const apiBase = (window as unknown as { FITONA_CONFIG?: { apiBase?: string } }).FITONA_CONFIG?.apiBase?.replace(/\/+$/, '') ?? '';
+  const withBase = apiBase ? req.clone({ url: apiBase + req.url }) : req;
+  const out = token ? withBase.clone({ setHeaders: { Authorization: `Bearer ${token}` } }) : withBase;
   return next(out).pipe(catchError((e: unknown) => {
     // Sesión caducada o cerrada en otro dispositivo: volver a la pantalla de entrar (no en el propio login).
     if (e instanceof HttpErrorResponse && e.status === 401 && token && !req.url.includes('/auth/login')) {

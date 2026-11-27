@@ -9,7 +9,8 @@ import javax.crypto.spec.PBEKeySpec;
 
 /** PBKDF2-HMAC-SHA256 con sal aleatoria (JDK, sin dependencias). Formato: pbkdf2$iteraciones$sal$hash (base64). */
 public final class PasswordHasher {
-    static final int ITERATIONS = 600_000; // recomendación OWASP 2023 para PBKDF2-SHA256
+    static final int DEFAULT_ITERATIONS = 600_000; // recomendación OWASP 2023 para PBKDF2-SHA256
+    private static final int MIN_ITERATIONS = 10_000;
     private static final SecureRandom RANDOM = new SecureRandom();
 
     private PasswordHasher() {}
@@ -17,7 +18,8 @@ public final class PasswordHasher {
     public static String hash(String password) {
         byte[] salt = new byte[16];
         RANDOM.nextBytes(salt);
-        return "pbkdf2$" + ITERATIONS + "$" + b64(salt) + "$" + b64(derive(password, salt, ITERATIONS));
+        int it = iterations();
+        return "pbkdf2$" + it + "$" + b64(salt) + "$" + b64(derive(password, salt, it));
     }
 
     public static boolean verify(String password, String stored) {
@@ -26,6 +28,16 @@ public final class PasswordHasher {
         byte[] expected = Base64.getDecoder().decode(p[3]);
         byte[] actual = derive(password, Base64.getDecoder().decode(p[2]), Integer.parseInt(p[1]));
         return MessageDigest.isEqual(expected, actual);
+    }
+
+    /**
+     * Iteraciones para contraseñas NUEVAS (fitona.auth.pbkdf2-iterations / FITONA_PBKDF2_ITERATIONS). Cada hash guarda las
+     * suyas, así que bajarlas (p. ej. en un servidor de 0,1 CPU) no invalida las contraseñas ya guardadas.
+     */
+    static int iterations() {
+        int v = org.eclipse.microprofile.config.ConfigProvider.getConfig()
+                .getOptionalValue("fitona.auth.pbkdf2-iterations", Integer.class).orElse(DEFAULT_ITERATIONS);
+        return Math.max(v, MIN_ITERATIONS);
     }
 
     private static byte[] derive(String password, byte[] salt, int iterations) {

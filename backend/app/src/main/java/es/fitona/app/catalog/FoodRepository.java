@@ -26,7 +26,7 @@ public class FoodRepository {
     private static final String SELECT = "SELECT v.ID, f.ID, f.CANONICAL_NAME, v.VARIANT_LABEL, p.ID, p.BASIS, "
             + "p.ENERGY_KCAL, p.PROTEIN_G, p.CARBS_G, p.SUGARS_G, p.FAT_G, p.SAT_FAT_G, p.FIBER_G, p.SALT_G, p.ALCOHOL_G, "
             + "p.DATA_QUALITY, v.DENSITY_G_PER_ML, CASE WHEN f.OWNER_USER_ID IS NULL THEN 0 ELSE 1 END, "
-            + "NVL(f.ICON, c.ICON), c.CODE, c.NAME_ES, CASE WHEN f.OVERRIDES_FOOD_ID IS NULL THEN 0 ELSE 1 END "
+            + "COALESCE(f.ICON, c.ICON), c.CODE, c.NAME_ES, CASE WHEN f.OVERRIDES_FOOD_ID IS NULL THEN 0 ELSE 1 END "
             + "FROM FOODS f JOIN FOOD_VARIANTS v ON v.FOOD_ID = f.ID LEFT JOIN NUTRIENT_PROFILES p ON p.ID = v.CURRENT_PROFILE_ID "
             + "LEFT JOIN FOOD_CATEGORIES c ON c.ID = f.CATEGORY_ID ";
 
@@ -62,7 +62,7 @@ public class FoodRepository {
         for (int i = 0; i < tokens.size(); i++) {
             sql.append(" AND EXISTS (SELECT 1 FROM FOOD_NAMES n WHERE n.FOOD_ID = f.ID AND n.NAME_KEY LIKE ?)");
         }
-        sql.append(" ORDER BY NVL(u.USE_COUNT, 0) DESC, f.CANONICAL_NAME, v.SORT_ORDER FETCH FIRST ? ROWS ONLY");
+        sql.append(" ORDER BY COALESCE(u.USE_COUNT, 0) DESC, f.CANONICAL_NAME, v.SORT_ORDER FETCH FIRST ? ROWS ONLY");
         List<FoodRecord> rows = db.query(sql.toString(), ps -> {
             int i = 1;
             ps.setBytes(i++, Ids.toRaw(user));
@@ -201,7 +201,7 @@ public class FoodRepository {
     public boolean update(UUID user, long variantId, NewFood f) {
         FoodRecord cur = findVariant(user, variantId);
         if (cur == null || !cur.editable()) return false;
-        db.update("UPDATE FOODS SET CANONICAL_NAME = ?, CATEGORY_ID = NVL((SELECT ID FROM FOOD_CATEGORIES WHERE CODE = ?), CATEGORY_ID) "
+        db.update("UPDATE FOODS SET CANONICAL_NAME = ?, CATEGORY_ID = COALESCE((SELECT ID FROM FOOD_CATEGORIES WHERE CODE = ?), CATEGORY_ID) "
                 + "WHERE ID = ?", ps -> {
             ps.setString(1, f.name());
             ps.setString(2, f.categoryCode());
@@ -246,7 +246,7 @@ public class FoodRepository {
     }
 
     public void touchUsage(UUID user, long variantId, BigDecimal quantity, String unitCode, BigDecimal grams) {
-        int updated = db.update("UPDATE USER_FOOD_USAGE SET USE_COUNT = USE_COUNT + 1, LAST_USED_AT = SYSTIMESTAMP, "
+        int updated = db.update("UPDATE USER_FOOD_USAGE SET USE_COUNT = USE_COUNT + 1, LAST_USED_AT = CURRENT_TIMESTAMP, "
                 + "LAST_QUANTITY = ?, LAST_UNIT_CODE = ?, LAST_GRAMS = ? WHERE USER_ID = ? AND VARIANT_ID = ?", ps -> {
             ps.setBigDecimal(1, quantity);
             ps.setString(2, unitCode);

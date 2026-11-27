@@ -92,3 +92,8 @@ Corregidos y con prueba: cantidades absurdas (antes 500 al guardar → ahora 400
 - **No hecho:** recuperar contraseña, verificar correo, «Entrar con Google» (se interpretó «Gmail y contraseña» como correo + contraseña; sirve cualquier correo, también Gmail), copias de seguridad, revisión legal. La política de privacidad de la app es un **borrador**.
 - **Publicación:** guía en `docs/publicar.md` (servidor con HTTPS vía `docker-compose.prod.yml` + Caddy; PWABuilder para Android; PWA en iPhone). **No ejecutado**: sin servidor, dominio ni cuentas desde aquí.
 
+## Doble base de datos: Oracle (local) y PostgreSQL (Render + Neon) (27-nov-2026)
+- **Implementado y probado en local:** esquema y catálogo portados a PostgreSQL (`database/migrations-pg`, generados con `database/tools/*.py`); el backend detecta la base y adapta el SQL (JSON, claves generadas, códigos de error); la API devuelve los decimales igual con las dos bases. Backend 45/45 con Oracle **y** con PostgreSQL (también con el rol `fitona_app` sin DDL y Flyway real); E2E 25/25 en modo local y con frontend/backend en dominios distintos (CORS).
+- **Configuración para Render** (`backend/Dockerfile.render`, `render.yaml`, `frontend/public/config.js`, variables en `docs/despliegue-render-neon.md`). Memoria medida bajo 512 MB y 0,1 CPU: bien; el hash de contraseñas hubo que abaratar (`FITONA_PBKDF2_ITERATIONS`).
+- **No probado:** despliegue real en Render/Neon; build de `Dockerfile.render` dentro de Render. **Coste de mantenimiento:** cada migración Oracle nueva exige regenerar y probar la de PostgreSQL.
+

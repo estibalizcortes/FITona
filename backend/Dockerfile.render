@@ -1,0 +1,28 @@
+# syntax=docker/dockerfile:1
+# Backend FITona para Render. Variante de backend/Dockerfile con PostgreSQL y memoria ajustada a 512 MB.
+# Contexto de construcción: la raíz del repositorio (ver docker-compose.yml).
+ARG MAVEN_IMAGE=maven:3.9-eclipse-temurin-21
+ARG JRE_IMAGE=eclipse-temurin:21-jre
+# Render (plan gratuito: 512 MB, 0,1 CPU) + Neon PostgreSQL. Contexto: raíz del repo; Dockerfile Path: backend/Dockerfile.render
+ARG DB_KIND=postgresql
+
+FROM ${MAVEN_IMAGE} AS build
+ARG DB_KIND
+WORKDIR /src
+COPY backend/pom.xml backend/pom.xml
+COPY backend/nutrition/pom.xml backend/nutrition/pom.xml
+COPY backend/app/pom.xml backend/app/pom.xml
+RUN --mount=type=cache,target=/root/.m2 mvn -B -q -f backend/pom.xml -pl app -am dependency:go-offline
+COPY backend backend
+RUN --mount=type=cache,target=/root/.m2 mvn -B -q -f backend/pom.xml -pl app -am -DskipTests -Dquarkus.datasource.db-kind=${DB_KIND} package
+
+FROM ${JRE_IMAGE} AS runtime
+RUN useradd --system --create-home --uid 10001 fitona
+WORKDIR /app
+COPY --from=build --chown=fitona /src/backend/app/target/quarkus-app/ /app/
+USER fitona
+# Render inyecta PORT (por defecto 10000); la app escucha en ese puerto (quarkus.http.port=${PORT:8080}).
+EXPOSE 10000
+# Memoria: heap máx. 256 MB (el resto: metaspace, hilos, buffers) y un solo recolector/compilador ligeros.
+ENV JAVA_OPTS="-Xms32m -Xmx256m -XX:MaxMetaspaceSize=128m -Xss512k -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -XX:CICompilerCount=1 -XX:+ExitOnOutOfMemoryError"
+ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar /app/quarkus-run.jar"]

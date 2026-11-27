@@ -2,6 +2,8 @@
 
 > Estado real (27-nov-2026): la app y el inicio de sesión con **correo y contraseña** funcionan y están probados en el entorno de desarrollo remoto. **Nada de lo que sigue se ha ejecutado**: no hay servidor, dominio ni cuenta de tienda conectados desde aquí. Las políticas de Google/Apple cambian: confirma cada requisito en su consola.
 
+> **Sin tarjeta y gratis (Render + Neon):** guía exacta en [despliegue-render-neon.md](despliegue-render-neon.md). Lo de abajo describe la alternativa con un servidor propio (VPS) y Oracle.
+
 ## 0. Qué se necesita (y no puedo hacer yo)
 | Qué | Quién | Coste orientativo |
 |---|---|---|

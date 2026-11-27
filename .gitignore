@@ -1,5 +1,8 @@
 # Secretos y entorno local
 .env
+.env.*
+!.env.example
+!.env.neon.example
 *.pem
 *.p12
 *.jks

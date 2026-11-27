@@ -69,7 +69,7 @@ public class DiaryRepository {
         db.update("INSERT INTO FOOD_LOG_ITEMS (ENTRY_ID, SORT_ORDER, ITEM_KIND, VARIANT_ID, RECIPE_VERSION_ID, DISPLAY_NAME, "
                 + "QUANTITY, UNIT_CODE, GRAMS, QUANTITY_SPECIFIED, SERVINGS, ESTIMATE_MODIFIERS, ENERGY_KCAL, PROTEIN_G, "
                 + "CARBS_G, SUGARS_G, FAT_G, SAT_FAT_G, FIBER_G, SALT_G, ALCOHOL_G, DATA_QUALITY, NUTRIENT_PROFILE_ID) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, TRUE, ?, JSON(?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", ps -> {
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, TRUE, ?, " + db.json() + ", ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", ps -> {
             ps.setBytes(1, Ids.toRaw(entryId));
             ps.setInt(2, sort);
             ps.setString(3, it.kind());
@@ -120,7 +120,7 @@ public class DiaryRepository {
         String in = entryIds.stream().map(x -> "?").collect(Collectors.joining(","));
         return db.query("SELECT ID, ENTRY_ID, ITEM_KIND, DISPLAY_NAME, QUANTITY, UNIT_CODE, GRAMS, SERVINGS, "
                 + "ENERGY_KCAL, PROTEIN_G, CARBS_G, SUGARS_G, FAT_G, SAT_FAT_G, FIBER_G, SALT_G, ALCOHOL_G, DATA_QUALITY, "
-                + "JSON_VALUE(ESTIMATE_MODIFIERS, '$.precision'), JSON_QUERY(ESTIMATE_MODIFIERS, '$.incomplete') FROM FOOD_LOG_ITEMS WHERE ENTRY_ID IN (" + in
+                + "" + db.jsonText("ESTIMATE_MODIFIERS", "precision") + ", " + db.jsonQuery("ESTIMATE_MODIFIERS", "incomplete") + " FROM FOOD_LOG_ITEMS WHERE ENTRY_ID IN (" + in
                 + ") ORDER BY SORT_ORDER", ps -> {
             int i = 1;
             for (UUID id : entryIds) ps.setBytes(i++, Ids.toRaw(id));
@@ -140,7 +140,7 @@ public class DiaryRepository {
     }
 
     public boolean softDelete(UUID user, UUID id) {
-        return db.update("UPDATE FOOD_LOG_ENTRIES SET DELETED_AT = SYSTIMESTAMP, ROW_VERSION = ROW_VERSION + 1 "
+        return db.update("UPDATE FOOD_LOG_ENTRIES SET DELETED_AT = CURRENT_TIMESTAMP, ROW_VERSION = ROW_VERSION + 1 "
                 + "WHERE ID = ? AND USER_ID = ? AND DELETED_AT IS NULL", ps -> {
             ps.setBytes(1, Ids.toRaw(id));
             ps.setBytes(2, Ids.toRaw(user));

@@ -28,8 +28,10 @@ public class AuthService {
     private static final int MAX_FAILURES = 5;
     private static final Duration WINDOW = Duration.ofMinutes(15);
     private static final SecureRandom RANDOM = new SecureRandom();
-    /** Hash de relleno para que «correo desconocido» tarde lo mismo que «contraseña incorrecta». */
-    private static final String DUMMY = PasswordHasher.hash("relleno-no-valido");
+    /** Hash de relleno (calculado solo al primer uso) para que «correo desconocido» tarde lo mismo que «contraseña incorrecta». */
+    private static final class Dummy {
+        static final String HASH = PasswordHasher.hash("relleno-no-valido");
+    }
 
     public record Session(String token, UUID userId, String email) {}
 
@@ -68,7 +70,7 @@ public class AuthService {
         }
         UUID id = UUID.randomUUID();
         try {
-            db.update("INSERT INTO APP_USERS (ID, AUTH_SUBJECT, ADULT_CONFIRMED_AT) VALUES (?, ?, SYSTIMESTAMP)", ps -> {
+            db.update("INSERT INTO APP_USERS (ID, AUTH_SUBJECT, ADULT_CONFIRMED_AT) VALUES (?, ?, CURRENT_TIMESTAMP)", ps -> {
                 ps.setBytes(1, Ids.toRaw(id));
                 ps.setString(2, "local:" + id);
             });
@@ -78,7 +80,7 @@ public class AuthService {
                 ps.setString(3, PasswordHasher.hash(password));
             });
         } catch (Db.DataAccessException e) {
-            if (e.errorCode() == 1) throw new AuthException(409, "Ya existe una cuenta con ese correo. Inicia sesión.");
+            if (e.isUnique()) throw new AuthException(409, "Ya existe una cuenta con ese correo. Inicia sesión.");
             throw e;
         }
         db.update("INSERT INTO USER_CONSENTS (USER_ID, CONSENT_CODE, POLICY_VERSION, GRANTED, DECISION_SOURCE) "
@@ -101,7 +103,7 @@ public class AuthService {
         }
         Object[] row = db.queryOne("SELECT USER_ID, PASSWORD_HASH FROM USER_CREDENTIALS WHERE EMAIL_NORM = ?",
                 ps -> ps.setString(1, email), rs -> new Object[] {Ids.fromRaw(rs.getBytes(1)), rs.getString(2)});
-        boolean ok = PasswordHasher.verify(password == null ? "" : password, row == null ? DUMMY : (String) row[1]);
+        boolean ok = PasswordHasher.verify(password == null ? "" : password, row == null ? Dummy.HASH : (String) row[1]);
         if (row == null || !ok) {
             synchronized (recent) {
                 recent.addLast(Instant.now());
@@ -114,7 +116,7 @@ public class AuthService {
 
     /** Persona dueña de un token vigente, o null. */
     public UUID userForToken(String token) {
-        return db.queryOne("SELECT USER_ID FROM AUTH_SESSIONS WHERE TOKEN_HASH = ? AND EXPIRES_AT > SYSTIMESTAMP",
+        return db.queryOne("SELECT USER_ID FROM AUTH_SESSIONS WHERE TOKEN_HASH = ? AND EXPIRES_AT > CURRENT_TIMESTAMP",
                 ps -> ps.setString(1, sha256(token)), rs -> Ids.fromRaw(rs.getBytes(1)));
     }
 
@@ -132,7 +134,7 @@ public class AuthService {
         RANDOM.nextBytes(raw);
         String token = Base64.getUrlEncoder().withoutPadding().encodeToString(raw);
         Timestamp expires = Timestamp.from(Instant.now().plus(SESSION_LIFETIME));
-        db.update("DELETE FROM AUTH_SESSIONS WHERE USER_ID = ? AND EXPIRES_AT < SYSTIMESTAMP", ps -> ps.setBytes(1, Ids.toRaw(user)));
+        db.update("DELETE FROM AUTH_SESSIONS WHERE USER_ID = ? AND EXPIRES_AT < CURRENT_TIMESTAMP", ps -> ps.setBytes(1, Ids.toRaw(user)));
         db.update("INSERT INTO AUTH_SESSIONS (TOKEN_HASH, USER_ID, EXPIRES_AT) VALUES (?, ?, ?)", ps -> {
             ps.setString(1, sha256(token));
             ps.setBytes(2, Ids.toRaw(user));

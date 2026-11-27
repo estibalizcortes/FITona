@@ -29,7 +29,7 @@ public class RecipeRepository {
     }
 
     public int nextVersionNumber(UUID recipeId) {
-        Integer n = db.queryOne("SELECT NVL(MAX(VERSION_NUMBER), 0) + 1 FROM RECIPE_VERSIONS WHERE RECIPE_ID = ?",
+        Integer n = db.queryOne("SELECT COALESCE(MAX(VERSION_NUMBER), 0) + 1 FROM RECIPE_VERSIONS WHERE RECIPE_ID = ?",
                 ps -> ps.setBytes(1, Ids.toRaw(recipeId)), rs -> rs.getInt(1));
         return n == null ? 1 : n;
     }
@@ -40,7 +40,7 @@ public class RecipeRepository {
         db.update("INSERT INTO RECIPE_VERSIONS (ID, RECIPE_ID, VERSION_NUMBER, TITLE, DESCRIPTION, SERVINGS, PREP_MINUTES, "
                 + "COOK_MINUTES, NUTRITION_COMPLETENESS, SERVING_ENERGY_KCAL, SERVING_PROTEIN_G, SERVING_CARBS_G, "
                 + "SERVING_FAT_G, SERVING_FIBER_G, NUTRITION_COMPUTED_AT, CREATED_BY_USER_ID) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, SYSTIMESTAMP, ?)", ps -> {
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?)", ps -> {
             ps.setBytes(1, Ids.toRaw(versionId));
             ps.setBytes(2, Ids.toRaw(recipeId));
             ps.setInt(3, number);
@@ -129,7 +129,7 @@ public class RecipeRepository {
     }
 
     public boolean softDelete(UUID user, UUID recipeId) {
-        return db.update("UPDATE RECIPES SET DELETED_AT = SYSTIMESTAMP, STATUS = 'ARCHIVED' "
+        return db.update("UPDATE RECIPES SET DELETED_AT = CURRENT_TIMESTAMP, STATUS = 'ARCHIVED' "
                 + "WHERE ID = ? AND OWNER_USER_ID = ? AND DELETED_AT IS NULL", ps -> {
             ps.setBytes(1, Ids.toRaw(recipeId));
             ps.setBytes(2, Ids.toRaw(user));

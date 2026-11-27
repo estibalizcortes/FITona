@@ -57,8 +57,8 @@ public class ProblemMapper {
     @ServerExceptionMapper
     public Response db(Db.DataAccessException e) {
         // ORA-02290 (CHECK), ORA-02291 (FK), ORA-00001 (único): datos que la BD rechaza por integridad.
-        if (e.errorCode() == 2290 || e.errorCode() == 2291 || e.errorCode() == 1) {
-            LOG.warnf("Restricción de integridad rechazada (ORA-%05d)", e.errorCode());
+        if (e.isIntegrity()) {
+            LOG.warnf("Restricción de integridad rechazada (código %d)", e.errorCode());
             return problem(400, "Datos no válidos", "La base de datos rechazó los valores por incoherentes.");
         }
         LOG.error("Error de acceso a datos", e);

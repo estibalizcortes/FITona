@@ -64,7 +64,7 @@ public class AuthFilter {
     private void ensureUser(UUID id) {
         try {
             db.update("INSERT INTO APP_USERS (ID, AUTH_SUBJECT, ADULT_CONFIRMED_AT) "
-                            + "SELECT ?, ?, SYSTIMESTAMP FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM APP_USERS WHERE ID = ?)",
+                            + "SELECT ?, ?, CURRENT_TIMESTAMP WHERE NOT EXISTS (SELECT 1 FROM APP_USERS WHERE ID = ?)",
                     ps -> {
                         ps.setBytes(1, Ids.toRaw(id));
                         ps.setString(2, "dev:" + id);
@@ -72,7 +72,7 @@ public class AuthFilter {
                     });
         } catch (Db.DataAccessException e) {
             // Carrera entre dos peticiones simultáneas de la misma persona nueva: la clave única ya existe.
-            if (e.errorCode() != 1) {
+            if (!e.isUnique()) {
                 LOG.error("No se pudo crear la persona de desarrollo", e);
                 throw e;
             }

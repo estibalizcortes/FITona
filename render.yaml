@@ -1,0 +1,36 @@
+# Blueprint de Render (plan gratuito, sin tarjeta). Opcional: puedes crear los dos servicios a mano (ver docs/despliegue-render-neon.md).
+# Sin credenciales aquí: las variables marcadas sync:false las escribes tú en el panel de Render.
+services:
+  - type: web
+    name: fitona-api
+    runtime: docker
+    plan: free
+    branch: claude-v1
+    dockerfilePath: ./backend/Dockerfile.render
+    dockerContext: .
+    healthCheckPath: /q/health/live   # liveness: no toca la BD (así Neon puede dormirse)
+    envVars:
+      - { key: FITONA_DB_KIND, value: postgresql }
+      - { key: FITONA_DB_INIT_SQL, value: SELECT 1 }
+      - { key: FITONA_DB_POOL_MAX, value: "3" }
+      - { key: FITONA_PBKDF2_ITERATIONS, value: "100000" }
+      - { key: FITONA_CORS_ENABLED, value: "true" }
+      - { key: JAVA_OPTS, value: "-Xms32m -Xmx256m -XX:MaxMetaspaceSize=128m -Xss512k -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -XX:CICompilerCount=1 -XX:+ExitOnOutOfMemoryError" }
+      - { key: FITONA_DB_URL, sync: false }          # jdbc:postgresql://HOST/DB?sslmode=require
+      - { key: FITONA_DB_USER, sync: false }         # fitona_app
+      - { key: FITONA_DB_PASSWORD, sync: false }
+      - { key: FITONA_CORS_ORIGINS, sync: false }    # https://fitona-web.onrender.com
+  - type: web
+    name: fitona-web
+    runtime: static
+    branch: claude-v1
+    rootDir: frontend
+    buildCommand: npm ci && npm run build && echo "window.FITONA_CONFIG = { apiBase: '$FITONA_API_URL' };" > dist/frontend/browser/config.js
+    staticPublishPath: dist/frontend/browser
+    envVars:
+      - { key: NODE_VERSION, value: 22.12.0 }
+      - { key: FITONA_API_URL, sync: false }          # https://fitona-api.onrender.com
+    routes:
+      - { type: rewrite, source: /*, destination: /index.html }
+    headers:
+      - { path: /config.js, name: Cache-Control, value: no-cache }
