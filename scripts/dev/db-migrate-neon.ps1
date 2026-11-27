@@ -82,19 +82,28 @@ $pull = Invoke-Native { docker pull -q $psqlImage }
 if ($pull.Code -ne 0) { throw "No se pudo descargar la imagen ${psqlImage}: $($pull.Out)" }
 $state = Invoke-Psql $cfg.NEON_OWNER_USER $cfg.NEON_OWNER_PASSWORD 'SELECT current_user, version()'
 Write-Host "  Conectado: $($state.Out)"
-$roleSql = @'
-DO $do$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'fitona_app') THEN
-        CREATE ROLE fitona_app LOGIN PASSWORD '__PW__' NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;
-    ELSE
-        ALTER ROLE fitona_app LOGIN PASSWORD '__PW__' NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;
-    END IF;
-END
-$do$;
-'@
-$null = Invoke-Psql $cfg.NEON_OWNER_USER $cfg.NEON_OWNER_PASSWORD ($roleSql -replace '__PW__', $cfg.NEON_APP_PASSWORD)
-Write-Host '  Rol fitona_app listo (sin superusuario, sin crear bases ni roles).'
+# Rol de la aplicación. Reglas de Neon (docs oficiales, «Manage roles»): un rol creado con SQL nace SIN privilegios especiales (solo los
+# creados desde Console/API/CLI entran en neon_superuser). El propietario (neon_superuser) tiene CREATEROLE pero NO es superusuario:
+# PostgreSQL le prohíbe mencionar NOSUPERUSER/NOREPLICATION/NOBYPASSRLS en un ALTER ROLE (aunque no cambien) -> por eso nunca se
+# mencionan atributos: CREATE ROLE sin banderas y, si ya existe, solo se comprueba y, si hace falta, se actualiza la clave.
+$attrSql = "SELECT rolsuper, rolcreatedb, rolcreaterole, rolreplication, rolbypassrls, pg_has_role('fitona_app','neon_superuser','member') FROM pg_roles WHERE rolname = 'fitona_app'"
+$attrs = (Invoke-Psql $cfg.NEON_OWNER_USER $cfg.NEON_OWNER_PASSWORD $attrSql).Out
+if (-not $attrs) {
+    $null = Invoke-Psql $cfg.NEON_OWNER_USER $cfg.NEON_OWNER_PASSWORD ("CREATE ROLE fitona_app LOGIN PASSWORD '__PW__'" -replace '__PW__', $cfg.NEON_APP_PASSWORD)
+    Write-Host '  Rol fitona_app creado (solo LOGIN: sin superusuario, sin crear bases ni roles).'
+} else {
+    if ($attrs -ne 'f|f|f|f|f|f') {
+        throw "El rol fitona_app ya existe pero NO es restringido [$attrs = superuser, createdb, createrole, replication, bypassrls, neon_superuser]. El script no lo modifica: corríjalo en Neon (Roles) y vuelva a ejecutarlo."
+    }
+    $probe = Invoke-Psql 'fitona_app' $cfg.NEON_APP_PASSWORD 'SELECT 1' -AllowFailure
+    if ($probe.Code -eq 0) {
+        Write-Host '  Rol fitona_app ya existe, es restringido y la clave de .env.neon es correcta: sin cambios.'
+    } else {
+        # Solo la clave, con la sintaxis documentada por Neon; los atributos no se tocan.
+        $null = Invoke-Psql $cfg.NEON_OWNER_USER $cfg.NEON_OWNER_PASSWORD ("ALTER ROLE fitona_app WITH PASSWORD '__PW__'" -replace '__PW__', $cfg.NEON_APP_PASSWORD)
+        Write-Host '  Rol fitona_app ya existía y es restringido: solo se actualizó su clave (los atributos no se tocan).'
+    }
+}
 
 Write-Host '2/4 Aplicando migraciones PostgreSQL (esquema, catálogo y permisos)...' -ForegroundColor Cyan
 $pull = Invoke-Native { docker pull -q $flywayImage }
